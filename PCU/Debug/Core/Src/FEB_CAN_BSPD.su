@@ -1,0 +1,2 @@
+../Core/Src/FEB_CAN_BSPD.c:19:6:FEB_CAN_BSPD_checkReset	8	static
+../Core/Src/FEB_CAN_BSPD.c:29:6:FEB_CAN_BSPD_Transmit	8	static

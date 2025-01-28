@@ -1,0 +1,12 @@
+../Core/Src/FEB_Normalized.c:30:10:FEB_Read_ADC	32	static
+../Core/Src/FEB_Normalized.c:47:7:FEB_Normalized_getAcc	4	static
+../Core/Src/FEB_Normalized.c:51:6:FEB_Normalized_setAcc0	4	static
+../Core/Src/FEB_Normalized.c:55:6:FEB_Read_Accel_Pedal1	288	static
+../Core/Src/FEB_Normalized.c:81:6:FEB_Read_Accel_Pedal2	288	static
+../Core/Src/FEB_Normalized.c:107:6:FEB_Read_Brake_Pedal	288	static
+../Core/Src/FEB_Normalized.c:133:6:FEB_Normalized_updateAcc	144	static
+../Core/Src/FEB_Normalized.c:143:7:FEB_Normalized_Acc_Pedals	160	static
+../Core/Src/FEB_Normalized.c:194:7:FEB_Normalized_getBrake	4	static
+../Core/Src/FEB_Normalized.c:198:6:FEB_Normalized_update_Brake	8	static
+../Core/Src/FEB_Normalized.c:202:7:FEB_Normalized_Brake_Pedals	152	static
+../Core/Src/FEB_Normalized.c:226:6:FEB_Normalized_CAN_sendBrake	152	static

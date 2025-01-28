@@ -1,0 +1,8 @@
+../Core/Src/FEB_TPS2482.c:36:6:FEB_TPS2482_Setup	1
+../Core/Src/FEB_TPS2482.c:64:6:FEB_TPS2482_shutdownIfError	4
+../Core/Src/FEB_TPS2482.c:88:6:FEB_TPS2482_pullLowIfOutOfBounds	5
+../Core/Src/FEB_TPS2482.c:115:7:FEB_TPS2482_PollBusCurrent	3
+../Core/Src/FEB_TPS2482.c:132:7:FEB_TPS2482_GetShunt	3
+../Core/Src/FEB_TPS2482.c:149:7:FEB_TPS2482_PollBusVoltage	3
+../Core/Src/FEB_TPS2482.c:166:6:FEB_TPS2482_sendReadings	1
+../Core/Src/FEB_TPS2482.c:178:6:FEB_TPS2482_CAN_Transmit	2
