@@ -32,27 +32,32 @@ uint16_t FEB_Read_ADC1(uint32_t channel){
 }
 
 void FEB_HECS_update(){
-	uint16_t current_value = FEB_Read_ADC1(HECS_SIGNAL);
+	uint16_t current_HECS = FEB_Read_ADC1(HECS_SIGNAL);
+	uint16_t current_ACC1 = FEB_Read_ADC1(ACC_PEDAL_1);
+	uint16_t current_BRAKE1 = FEB_Read_ADC1(BRAKE_PRESS_1);
+	uint16_t current_ACC2 = FEB_Read_ADC1(ACC_PEDAL_2);
+	uint16_t current_BRAKE2 = FEB_Read_ADC1(BRAKE_PRESS_2);
+
 	char buf[128];
 	uint8_t buf_len;
-	buf_len = sprintf(buf, "HECS Current:%d\n", current_value);
+	buf_len = sprintf(buf, "HECS Current:%d, %d, %d, %d, %d\n\r", current_HECS,current_ACC1,current_BRAKE1,current_ACC2,current_BRAKE2);
 	HAL_UART_Transmit(&huart2, buf, strlen(buf), HAL_MAX_DELAY);
 
-	if (current_value >= HECS_CURRENT){ //checks if current is above value (to be determined)
+	if (current_HECS >= HECS_CURRENT){ //checks if current is above value (to be determined)
 		currHigh = true;
 	}else{
 		currHigh = false;
 	}
-	FEB_HECS_indicate();
+	//FEB_HECS_indicate();
 }
 
-void FEB_HECS_indicate(){ //sends GPIO output to HECS Indicator
-	if (currHigh == true){
-
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET); // sets GPIO PA5 to high
-
-	}else{
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET); //sets GPIPO PA5 to low
-	}
-//	HAL_Delay(1000);
-}
+//void FEB_HECS_indicate(){ //sends GPIO output to HECS Indicator
+//	if (currHigh == true){
+//
+//		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET); // sets GPIO PA5 to high
+//
+//	}else{
+//		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET); //sets GPIPO PA5 to low
+//	}
+////	HAL_Delay(1000);
+//}

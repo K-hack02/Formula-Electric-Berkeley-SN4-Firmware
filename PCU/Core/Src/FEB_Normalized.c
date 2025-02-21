@@ -105,7 +105,7 @@ void FEB_Read_Accel_Pedal2() {
 }
 
 void FEB_Read_Brake_Pedal() {
-	uint16_t brake_pedal_raw = FEB_Read_ADC(BRAKE_PEDAL);
+	uint16_t brake_pedal_raw = FEB_Read_ADC(BRAKE_PRESS_1);
 
 	float brake_pedal_position = 0.03256 * brake_pedal_raw - 13.4;
 

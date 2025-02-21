@@ -63,6 +63,14 @@ void Error_Handler(void);
 #define IVMeter_IND_GPIO_Port GPIOC
 #define RST_Pin GPIO_PIN_1
 #define RST_GPIO_Port GPIOC
+#define brake1_Pin GPIO_PIN_2
+#define brake1_GPIO_Port GPIOC
+#define brake2_Pin GPIO_PIN_3
+#define brake2_GPIO_Port GPIOC
+#define acc1_Pin GPIO_PIN_0
+#define acc1_GPIO_Port GPIOA
+#define acc2_Pin GPIO_PIN_1
+#define acc2_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
@@ -75,6 +83,8 @@ void Error_Handler(void);
 #define SHUTDOWN_GPIO_Port GPIOA
 #define PTS_HALF_Pin GPIO_PIN_7
 #define PTS_HALF_GPIO_Port GPIOA
+#define brakeIn_Pin GPIO_PIN_4
+#define brakeIn_GPIO_Port GPIOC
 #define BTS_HALF_Pin GPIO_PIN_5
 #define BTS_HALF_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
