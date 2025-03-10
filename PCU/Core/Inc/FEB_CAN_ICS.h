@@ -4,6 +4,7 @@
 // **************************************** Includes ****************************************
 
 #include "FEB_CAN_ID.h"
+#include "feb_can_dbc.h"
 #include <stdbool.h>
 #include "stm32f4xx_hal.h"
 

@@ -1,4 +1,4 @@
-Core/Src/FEB_Main.o: ../Core/Src/FEB_Main.c ../Core/Inc/FEB_Main.h \
+Core/Src/TPS2482.o: ../Core/Src/TPS2482.c ../Core/Inc/TPS2482.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -30,14 +30,8 @@ Core/Src/FEB_Main.o: ../Core/Src/FEB_Main.c ../Core/Inc/FEB_Main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/FEB_Timer.h ../Core/Inc/FEB_CAN.h ../Core/Inc/FEB_CAN_ICS.h \
- ../Core/Inc/FEB_CAN_ID.h ../Core/Inc/feb_can_dbc.h \
- ../Core/Inc/FEB_CAN_RMS.h ../Core/Inc/FEB_CAN_BMS.h \
- ../Core/Inc/FEB_Normalized.h ../Core/Inc/FEB_Const.h \
- ../Core/Inc/FEB_CAN_BSPD.h ../Core/Inc/FEB_TPS2482.h \
- ../Core/Inc/FEB_HECS.h
-../Core/Inc/FEB_Main.h:
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+../Core/Inc/TPS2482.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
@@ -70,15 +64,3 @@ Core/Src/FEB_Main.o: ../Core/Src/FEB_Main.c ../Core/Inc/FEB_Main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../Core/Inc/FEB_Timer.h:
-../Core/Inc/FEB_CAN.h:
-../Core/Inc/FEB_CAN_ICS.h:
-../Core/Inc/FEB_CAN_ID.h:
-../Core/Inc/feb_can_dbc.h:
-../Core/Inc/FEB_CAN_RMS.h:
-../Core/Inc/FEB_CAN_BMS.h:
-../Core/Inc/FEB_Normalized.h:
-../Core/Inc/FEB_Const.h:
-../Core/Inc/FEB_CAN_BSPD.h:
-../Core/Inc/FEB_TPS2482.h:
-../Core/Inc/FEB_HECS.h:

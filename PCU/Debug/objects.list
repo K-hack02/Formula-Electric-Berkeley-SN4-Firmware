@@ -9,6 +9,8 @@
 "./Core/Src/FEB_Normalized.o"
 "./Core/Src/FEB_TPS2482.o"
 "./Core/Src/FEB_Timer.o"
+"./Core/Src/TPS2482.o"
+"./Core/Src/feb_can_ dbc.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32f4xx_hal_msp.o"
 "./Core/Src/stm32f4xx_it.o"

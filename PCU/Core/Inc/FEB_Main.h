@@ -15,6 +15,7 @@
 #include "FEB_Normalized.h"
 #include "FEB_TPS2482.h"
 #include "FEB_HECS.h"
+#include "feb_can_dbc.h"
 
 
 // ******************************** Functions ********************************

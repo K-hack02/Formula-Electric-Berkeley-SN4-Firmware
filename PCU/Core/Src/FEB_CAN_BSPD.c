@@ -2,6 +2,7 @@
 
 #include "FEB_CAN_BSPD.h"
 
+
 extern CAN_HandleTypeDef hcan1;
 extern uint8_t FEB_CAN_Tx_Data[8];
 extern CAN_TxHeaderTypeDef FEB_CAN_Tx_Header;
@@ -31,7 +32,7 @@ void FEB_CAN_BSPD_Transmit(void) {
     // Write Code Here
 	// Initialize transmission header
 	FEB_CAN_Tx_Header.DLC = 1;
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_ID_APPS_BSPD; //ID for sending paramater messages for RMS
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_BSPD_FRAME_ID; //ID for sending paramater messages for RMS
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
