@@ -35,17 +35,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_rnglists 00000c04  00000000  00000000  00022e00  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00025e5d  00000000  00000000  00023a04  2**0
+ 16 .debug_macro  00025e87  00000000  00000000  00023a04  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   000162f6  00000000  00000000  00049861  2**0
+ 17 .debug_line   00016318  00000000  00000000  0004988b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000df358  00000000  00000000  0005fb57  2**0
+ 18 .debug_str    000df358  00000000  00000000  0005fba3  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  0013eeaf  2**0
+ 19 .comment      00000043  00000000  00000000  0013eefb  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00005380  00000000  00000000  0013eef4  2**2
+ 20 .debug_frame  00005380  00000000  00000000  0013ef40  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000058  00000000  00000000  00144274  2**0
+ 21 .debug_line_str 00000058  00000000  00000000  001442c0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -3282,9 +3282,9 @@ void FEB_Normalized_CAN_sendBrake() {
  8001e12:	4b27      	ldr	r3, [pc, #156]	@ (8001eb0 <FEB_Normalized_CAN_sendBrake+0xa4>)
  8001e14:	2202      	movs	r2, #2
  8001e16:	611a      	str	r2, [r3, #16]
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_ID_APPS_BRAKE_PEDAL;
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_NORMALIZED_BRAKE_FRAME_ID;
  8001e18:	4b25      	ldr	r3, [pc, #148]	@ (8001eb0 <FEB_Normalized_CAN_sendBrake+0xa4>)
- 8001e1a:	2209      	movs	r2, #9
+ 8001e1a:	2205      	movs	r2, #5
  8001e1c:	601a      	str	r2, [r3, #0]
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
  8001e1e:	4b24      	ldr	r3, [pc, #144]	@ (8001eb0 <FEB_Normalized_CAN_sendBrake+0xa4>)

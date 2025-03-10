@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "feb_can_dbc.h"
+
 // **************************************** Functions ****************************************
 
 void FEB_Read_Accel_Pedal1();

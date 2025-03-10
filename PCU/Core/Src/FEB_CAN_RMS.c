@@ -193,34 +193,35 @@ void FEB_CAN_RMS_Torque(void){
 	FEB_SM_ST_t current_BMS_state = FEB_CAN_BMS_getState(); // TODO: FOR ALEX
 	float accPos = FEB_Normalized_Acc_Pedals();
 	float brkPos = FEB_Normalized_getBrake();
-	if (brkPos > BRAKE_POSITION_THRESH) // brake identified
-	{
-		if ((current_BMS_state == FEB_SM_ST_DRIVE_REGEN))
-		{
-		    // Brake detected, regen allowed
-			// Multiply by -1 to regen (opposite direction)
-			RMSControl.torque = -1 * 10 * brkPos * FEB_CAN_RMS_getFilteredTorque_Regen();
-		}
-		else
-		{
-			// Brake detected, but regen not allowed -> command 0 torque
-			RMSControl.torque = 0;
-		}
-	}
-	else
-	{
-	    if ((current_BMS_state == FEB_SM_ST_DRIVE) ||
-	        (current_BMS_state == FEB_SM_ST_DRIVE_REGEN))
-	    {
-	        // No braking detected, send throttle command
-    		RMSControl.torque = 10 * accPos * FEB_CAN_RMS_getMaxTorque();
-	    }
-	    else
-	    {
-	        // No braking detected, but driving not allowed by BMS state
-	        RMSControl.torque = 0;
-	    }
-	}
+//	if (brkPos > BRAKE_POSITION_THRESH) // brake identified
+//	{
+//		if ((current_BMS_state == FEB_SM_ST_DRIVE_REGEN))
+//		{
+//		    // Brake detected, regen allowed
+//			// Multiply by -1 to regen (opposite direction)
+//			RMSControl.torque = -1 * 10 * brkPos * FEB_CAN_RMS_getFilteredTorque_Regen();
+//		}
+//		else
+//		{
+//			// Brake detected, but regen not allowed -> command 0 torque
+//			RMSControl.torque = 0;
+//		}
+//	}
+//	else
+//	{
+//	    if ((current_BMS_state == FEB_SM_ST_DRIVE) ||
+//	        (current_BMS_state == FEB_SM_ST_DRIVE_REGEN))
+//	    {
+//	        // No braking detected, send throttle command
+//    		RMSControl.torque = 10 * accPos * FEB_CAN_RMS_getMaxTorque();
+//	    }
+//	    else
+//	    {
+//	        // No braking detected, but driving not allowed by BMS state
+//	        RMSControl.torque = 0;
+//	    }
+//	}
+	RMSControl.torque = 10 * accPos * FEB_CAN_RMS_getMaxTorque(); // temp
 //	int16_t max_torque = 10 * accPos * FEB_CAN_RMS_getMaxTorque();
 //
 //	char buf[100];

@@ -1,6 +1,7 @@
 // **************************************** Includes & External ****************************************
 
 #include "FEB_Normalized.h"
+#include "feb_can_dbc.h"
 
 extern CAN_HandleTypeDef hcan1;
 extern ADC_HandleTypeDef hadc1;
@@ -226,7 +227,7 @@ float FEB_Normalized_Brake_Pedals() {
 void FEB_Normalized_CAN_sendBrake() {
 	// Initialize transmission header
 	FEB_CAN_Tx_Header.DLC = 2;
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_ID_APPS_BRAKE_PEDAL;
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_NORMALIZED_BRAKE_FRAME_ID;
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
