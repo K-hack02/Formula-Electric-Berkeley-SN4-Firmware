@@ -29,9 +29,9 @@
  * SOFTWARE.
  */
 
+#include <FEB_CAN.h>
 #include <string.h>
 
-#include "feb_can.h"
 
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,

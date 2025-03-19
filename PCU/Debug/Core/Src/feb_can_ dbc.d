@@ -1,5 +1,5 @@
 Core/Src/feb_can_ dbc.o: ../Core/Src/feb_can_\ dbc.c \
- ../Core/Inc/feb_can.h \
+ ../Core/Inc/FEB_CAN.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -34,7 +34,7 @@ Core/Src/feb_can_ dbc.o: ../Core/Src/feb_can_\ dbc.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/FEB_CAN_ICS.h ../Core/Inc/FEB_CAN_ID.h \
  ../Core/Inc/feb_can_dbc.h
-../Core/Inc/feb_can.h:
+../Core/Inc/FEB_CAN.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:

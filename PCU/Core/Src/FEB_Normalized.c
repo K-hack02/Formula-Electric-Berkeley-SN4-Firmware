@@ -234,6 +234,8 @@ void FEB_Normalized_CAN_sendBrake() {
 
 	// Copy data to Tx buffer. This might be incorrect. It's possible you have to do some bit shifting
 //	memcpy(FEB_CAN_Tx_Data, &normalized_brake, sizeof(float));
+	FEB_Normalized_update_Brake();
+	memcpy(FEB_CAN_Tx_Data, &normalized_brake, sizeof(float)); // maybe?
 	uint8_t converted_brake_val = (uint8_t)(normalized_brake * 100);
 
 	FEB_CAN_Tx_Data[0] = converted_brake_val;

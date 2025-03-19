@@ -8,7 +8,9 @@ extern uint8_t FEB_CAN_Tx_Data[8];
 extern uint32_t FEB_CAN_Tx_Mailbox;
 
 // ******************************** Variables ********************************
-bool READY_TO_DRIVE = 0;
+//bool READY_TO_DRIVE = 0;
+static bool previous_button_state = false;
+static bool READY_TO_DRIVE = false;
 
 // **************************************** Functions ****************************************
 
@@ -44,8 +46,22 @@ uint8_t FEB_CAN_ICS_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uin
 void FEB_CAN_ICS_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
 	switch(rx_header->StdId) {
 		case FEB_CAN_ID_ICS_BUTTON_STATE:
-				READY_TO_DRIVE = ((rx_data[0] | 0b11111101) == 0b11111111);
-				break;
+//				READY_TO_DRIVE = ((rx_data[0] | 0b11111101) == 0b11111111);
+//				break;
+
+			bool current_button_state = ((rx_data[0] | 0b11111101) == 0b11111111);
+
+
+			if (READY_TO_DRIVE && !previous_button_state && current_button_state) {
+				READY_TO_DRIVE = false;  // return to energized state
+			}
+
+			else if (!READY_TO_DRIVE && !previous_button_state && current_button_state) {
+				READY_TO_DRIVE = true;   // enter ready to drive state
+			}
+
+			previous_button_state = current_button_state;
+			break;
 	}
 }
 
