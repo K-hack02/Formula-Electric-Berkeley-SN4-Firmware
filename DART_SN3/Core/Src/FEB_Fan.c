@@ -35,7 +35,7 @@ static void FEB_TACH_IIR(uint16_t *data_in, uint16_t *data_out, uint32_t *filter
 
 void FEB_Fan_Init(void) {
 	FEB_Fan_PWM_Init();
-	FEB_Fan_All_Speed_Set(40 * 1); // starts at 100% duty cycle
+	FEB_Fan_All_Speed_Set((uint8_t)(PWM_COUNTER * PWM_START_PERCENT)); // starts at 100% duty cycle
 	FEB_Fan_TACH_Init();
 }
 
@@ -109,7 +109,7 @@ void FEB_Fan_TACH_Callback(TIM_HandleTypeDef *htim) {
 
 					FEB_TACH_IIR(frequency, frequency, filter, NUM_FANS, filter_init);
 
-					#ifdef PRINT_DEBUG_TACH
+					#if PRINT_DEBUG_TACH
 
 					char str[512];
 

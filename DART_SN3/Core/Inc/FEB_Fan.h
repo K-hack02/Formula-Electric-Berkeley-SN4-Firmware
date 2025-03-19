@@ -8,12 +8,17 @@
 
 // ********************************** Defines **********************************
 
+#define PRINT_DEBUG_TACH 0
+
 #define TACH_FILTER_EXPONENT 2
 
-#define TIMCLOCK   	48000000
-#define PRESCALAR  	1
-#define REF_CLOCK	TIMCLOCK / PRESCALAR
-#define NUM_FANS	5
+#define TIMCLOCK   			(uint32_t)	48000000
+#define PRESCALAR  			(uint32_t)	1
+#define REF_CLOCK			(float)		TIMCLOCK / PRESCALAR
+#define NUM_FANS			(uint32_t)	5
+#define PWM_SIZE			(uint32_t)	40
+#define PWM_COUNTER			(uint32_t)	(TIMCLOCK * PWM_SIZE / (1000.0f * 1000.0f))
+#define PWM_START_PERCENT 	(float)		1
 
 #define ADC_FILTER_EXPONENT 2
 

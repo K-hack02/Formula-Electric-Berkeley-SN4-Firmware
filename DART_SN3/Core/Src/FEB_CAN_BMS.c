@@ -33,11 +33,7 @@ uint8_t FEB_CAN_BMS_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uin
 void FEB_CAN_BMS_Process_Message(CAN_RxHeaderTypeDef *rx_header, uint8_t FEB_CAN_Rx_Data[]) {
 	switch(rx_header->ExtId) {
 		case FEB_CAN_ID_BMS_DART1_REQUESTED_FAN_SPEEDS:
-			FEB_Fan_1_Speed_Set(FEB_CAN_Rx_Data[0]);
-			FEB_Fan_2_Speed_Set(FEB_CAN_Rx_Data[1]);
-			FEB_Fan_3_Speed_Set(FEB_CAN_Rx_Data[2]);
-			FEB_Fan_4_Speed_Set(FEB_CAN_Rx_Data[3]);
-			FEB_Fan_5_Speed_Set(FEB_CAN_Rx_Data[4]);
+			FEB_Fan_CAN_Msg_Process(FEB_CAN_Rx_Data);
 			break;
-		}
 	}
+}
