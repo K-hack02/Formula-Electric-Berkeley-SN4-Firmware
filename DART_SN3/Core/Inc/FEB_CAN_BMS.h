@@ -12,6 +12,5 @@
 
 uint8_t FEB_CAN_BMS_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank);
 void FEB_CAN_BMS_Process_Message(CAN_RxHeaderTypeDef *FEB_CAN_Rx_Header, uint8_t FEB_CAN_Rx_Data[]);
-void FEB_CAN_Transmit(void);
 
 #endif /* INC_FEB_CAN_BMS_H_ */

@@ -33,7 +33,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
-#include "FEB_main.h"
+#include <FEB_Main.h>
 //#include "stdio.h"
 /* USER CODE END Includes */
 
@@ -62,6 +62,16 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define TACH4_Pin GPIO_PIN_0
+#define TACH4_GPIO_Port GPIOA
+#define TACH5_Pin GPIO_PIN_1
+#define TACH5_GPIO_Port GPIOA
+#define TACH1_Pin GPIO_PIN_4
+#define TACH1_GPIO_Port GPIOA
+#define TACH2_Pin GPIO_PIN_0
+#define TACH2_GPIO_Port GPIOB
+#define TACH3_Pin GPIO_PIN_1
+#define TACH3_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

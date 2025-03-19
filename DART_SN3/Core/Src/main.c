@@ -141,9 +141,8 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -154,11 +153,11 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI48;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -223,9 +222,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 8-1;
+  htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 40;
+  htim1.Init.Period = 40*48;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -307,7 +306,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 4294967295;
+  htim2.Init.Period = 294967295;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -368,9 +367,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 8-1;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 40;
+  htim3.Init.Period = 40*48;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -447,7 +446,7 @@ static void MX_TIM14_Init(void)
   htim14.Instance = TIM14;
   htim14.Init.Prescaler = 0;
   htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim14.Init.Period = 40;
+  htim14.Init.Period = 65535;
   htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
@@ -527,103 +526,9 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-static uint32_t filter[1];
-static bool filter_init[1];
-
-#define ADC_FILTER_EXPONENT 2
-
-static void FEB_Current_IIR(uint16_t *data_in, uint16_t *data_out, uint32_t *filters, \
-											uint8_t length, bool *filter_initialized) {
-	uint16_t *dest = data_out;
-	uint32_t *dest_filters = filters;
-
-	for ( uint8_t i = 0; i < length; i++ ) {
-		if ( !filter_initialized[i] ) {
-			dest_filters[i] = data_in[i] << ADC_FILTER_EXPONENT;
-			dest[i] = data_in[i];
-			filter_initialized[i] = true;
-		}
-		else {
-			dest_filters[i] += data_in[i] - (dest_filters[i] >>  ADC_FILTER_EXPONENT);
-			dest[i] = dest_filters[i] >> ADC_FILTER_EXPONENT;
-		}
-	}
-}
-
-#define TIMCLOCK   	8000000
-#define PRESCALAR  	1
-#define REF_CLOCK	TIMCLOCK / PRESCALAR
-
-static uint32_t IC_first_rising_edge[5] = {0, 0, 0, 0, 0};
-static uint32_t IC_second_rising_edge[5] = {0, 0, 0, 0, 0};
-static bool first_capture[5] = {false, false, false, false, false};
-
-/* Measure Frequency */
-static uint16_t frequency[5] = {0, 0, 0, 0, 0};
-
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
-	if ( &htim2 == htim ) {
-
-		if ( htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2 ) {
-
-			if ( first_capture[0] == false ) {
-
-				IC_first_rising_edge[0] = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
-				first_capture[0] = true;
-			}
-
-			else {
-				uint32_t diff = 0;
-
-				IC_second_rising_edge[0] = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
-
-				if (IC_second_rising_edge[0] > IC_first_rising_edge[0]) {
-
-					diff = IC_second_rising_edge[0] - IC_first_rising_edge[0];
-				}
-
-				else if (IC_first_rising_edge[0] > IC_second_rising_edge[0]) {
-
-					diff = (0xFFFFFFFF - IC_first_rising_edge[0]) + IC_second_rising_edge[0];
-				}
-
-				else {
-					frequency[0] = 0;
-					return;
-				}
-
-				frequency[0] = REF_CLOCK / diff;
-
-//				FEB_Current_IIR(frequency, frequency, filter, 1, filter_init);
-
-				char str[512];
-
-				sprintf(str, "Frequency: %u\n\r", frequency[0]);
-
-				HAL_UART_Transmit(&huart2, (uint8_t *) str, strlen(str), 100);
-
-//				sprintf(str, "First Edge: %lu\n\r", IC_first_rising_edge);
-//
-//				HAL_UART_Transmit(&huart2, (uint8_t *) str, strlen(str), 100);
-//
-//				sprintf(str, "Second Edge: %lu\n\r\n\r", IC_second_rising_edge);
-//
-//				HAL_UART_Transmit(&huart2, (uint8_t *) str, strlen(str), 100);
-
-				IC_first_rising_edge[0] = IC_second_rising_edge[0];
-//				__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
-//				first_capture = false; // set it back to false
-
-			}
-		}
-	}
+	FEB_Fan_TACH_Callback(htim);
 }
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-
-}
-
-
 /* USER CODE END 4 */
 
 /**
