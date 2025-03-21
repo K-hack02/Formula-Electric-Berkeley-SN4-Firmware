@@ -38,7 +38,8 @@ Core/Src/FEB_UI.o: ../Core/Src/FEB_UI.c ../Core/Inc/FEB_UI.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dsi.h \
  ../Core/Inc/FEB_IO_ICS.h ../Core/Inc/FEB_UI.h ../Core/Inc/FEB_CAN_BMS.h \
- ../Core/Inc/FEB_IO_ICS.h ../Core/Inc/FEB_CAN_APPS.h \
+ ../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h ../Core/Inc/FEB_IO_ICS.h \
+ ../Core/Inc/FEB_CAN_APPS.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/lvgl/lvgl.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/lvgl/src/misc/lv_log.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/lvgl/src/misc/../lv_conf_internal.h \
@@ -313,6 +314,7 @@ Core/Src/FEB_UI.o: ../Core/Src/FEB_UI.c ../Core/Inc/FEB_UI.h \
 ../Core/Inc/FEB_IO_ICS.h:
 ../Core/Inc/FEB_UI.h:
 ../Core/Inc/FEB_CAN_BMS.h:
+../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h:
 ../Core/Inc/FEB_IO_ICS.h:
 ../Core/Inc/FEB_CAN_APPS.h:
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/lvgl/lvgl.h:

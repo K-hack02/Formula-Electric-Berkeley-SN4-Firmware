@@ -270,8 +270,8 @@ Core/Src/FEB_UART_Transmit.o: ../Core/Src/FEB_UART_Transmit.c \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui_helpers.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui_events.h \
- ../Core/Inc/FEB_CAN_BMS.h ../Core/Inc/FEB_IO_ICS.h \
- ../Core/Inc/FEB_CAN_APPS.h
+ ../Core/Inc/FEB_CAN_BMS.h ../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h \
+ ../Core/Inc/FEB_IO_ICS.h ../Core/Inc/FEB_CAN_APPS.h
 ../Core/Inc/FEB_UART_Transmit.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -546,5 +546,6 @@ Core/Src/FEB_UART_Transmit.o: ../Core/Src/FEB_UART_Transmit.c \
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui.h:
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui_events.h:
 ../Core/Inc/FEB_CAN_BMS.h:
+../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h:
 ../Core/Inc/FEB_IO_ICS.h:
 ../Core/Inc/FEB_CAN_APPS.h:

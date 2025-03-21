@@ -38,14 +38,14 @@ void FEB_IO_ICS_Loop(void) {
 //		r2d = 0; //Reset r2d if we're no longer in drive or drive regen.
 //	}
 
-	if(r2d == 0 && bms_state == FEB_SM_ST_DRIVE_STANDBY){
+	if(r2d == 0 && bms_state == FEB_SM_ST_DRIVE){
 		lv_obj_set_style_bg_color(ui_TextArea3, lv_color_hex(0xFFFF00), LV_PART_MAIN | LV_STATE_DEFAULT );
 
 	}
 
 	// Button 1 - Ready-to-Drive (RTD) button
 	if (!(received_data & (1<<1))) {
-		if (((HAL_GetTick() - rtd_press_start_time) >= BTN_HOLD_TIME) && brake_pressure >= 4 && (bms_state == FEB_SM_ST_DRIVE_STANDBY || bms_state == FEB_SM_ST_DRIVE_REGEN || bms_state == FEB_SM_ST_DRIVE)) {
+		if (((HAL_GetTick() - rtd_press_start_time) >= BTN_HOLD_TIME) && brake_pressure >= 4 && (bms_state == FEB_SM_ST_ENERGIZED /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/ || bms_state == FEB_SM_ST_DRIVE)) {
 
 			//Flio ready to drive if pressed again to turn it off
 			r2d = (r2d == 1) ? 0 : 1;
@@ -124,7 +124,7 @@ void FEB_IO_ICS_Loop(void) {
 
 	HAL_UART_Transmit(&huart3, buffer, 1, 100);
 
-	if (set_rtd_buzzer == 0 && (bms_state ==  FEB_SM_ST_DRIVE || bms_state ==FEB_SM_ST_DRIVE_REGEN) && inv_enabled == 1) {
+	if (set_rtd_buzzer == 0 && (bms_state ==  FEB_SM_ST_DRIVE /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/) && inv_enabled == 1) {
 		if (rtd_buzzer_start_time == 0) {
 			rtd_buzzer_start_time = HAL_GetTick();
 		}
@@ -160,7 +160,7 @@ void FEB_IO_ICS_Loop(void) {
 	uint8_to_binary_string(IO_state, button_state_str);
 //	lv_label_set_text(ui_buttonField, button_state_str);
 
-//	FEB_CAN_ICS_Transmit_Button_State(IO_state); co
+	FEB_CAN_ICS_Transmit_Button_State(IO_state);
 }
 
 // set nth bit

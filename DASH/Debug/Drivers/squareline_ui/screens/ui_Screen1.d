@@ -271,6 +271,7 @@ Drivers/squareline_ui/screens/ui_Screen1.o: \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_IO_ICS.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_UI.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_CAN_BMS.h \
+ /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h \
  ../Core/Inc/FEB_IO_ICS.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_CAN_APPS.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/lvgl/lvgl.h \
@@ -548,6 +549,7 @@ Drivers/squareline_ui/screens/ui_Screen1.o: \
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_IO_ICS.h:
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_UI.h:
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_CAN_BMS.h:
+/Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h:
 ../Core/Inc/FEB_IO_ICS.h:
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../../Core/Inc/FEB_CAN_APPS.h:
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/lvgl/lvgl.h:

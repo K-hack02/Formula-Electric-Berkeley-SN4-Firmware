@@ -33,12 +33,12 @@ void FEB_Siren_Activate(){
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 }
 void FEB_cs_low() {
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
 }
 
 
 void FEB_cs_high() {
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
 }
 void FEB_spi_write_array(
 		uint16_t size,                     /*Option: Number of bytes to be written on the SPI port*/

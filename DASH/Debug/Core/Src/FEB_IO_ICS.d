@@ -269,7 +269,7 @@ Core/Src/FEB_IO_ICS.o: ../Core/Src/FEB_IO_ICS.c ../Core/Inc/FEB_IO_ICS.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui_events.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/hal_stm_lvgl/screen_driver.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/hal_stm_lvgl/touch_sensor_driver.h \
- ../Core/Inc/FEB_CAN_BMS.h
+ ../Core/Inc/FEB_CAN_BMS.h ../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h
 ../Core/Inc/FEB_IO_ICS.h:
 ../Core/Inc/FEB_UI.h:
 ../Core/Inc/FEB_CAN_ICS.h:
@@ -545,3 +545,4 @@ Core/Src/FEB_IO_ICS.o: ../Core/Src/FEB_IO_ICS.c ../Core/Inc/FEB_IO_ICS.h \
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/hal_stm_lvgl/screen_driver.h:
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/hal_stm_lvgl/touch_sensor_driver.h:
 ../Core/Inc/FEB_CAN_BMS.h:
+../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h:

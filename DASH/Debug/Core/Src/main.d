@@ -262,7 +262,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/FEB_Main.h ../Core/Inc/FEB_UI.h ../Core/Inc/FEB_CAN_ICS.h \
  ../Core/Inc/FEB_CAN_Library/FEB_CAN_ID.h ../Core/Inc/FEB_UART_TRANSMIT.h \
  ../Core/Inc/FEB_IO_ICS.h ../Core/Inc/FEB_CAN_BMS.h \
- ../Core/Inc/FEB_IO_ICS.h ../Core/Inc/FEB_CAN_APPS.h \
+ ../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h ../Core/Inc/FEB_IO_ICS.h \
+ ../Core/Inc/FEB_CAN_APPS.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/../lvgl/lvgl.h \
  /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui_helpers.h \
@@ -540,6 +541,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/FEB_UART_TRANSMIT.h:
 ../Core/Inc/FEB_IO_ICS.h:
 ../Core/Inc/FEB_CAN_BMS.h:
+../Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.h:
 ../Core/Inc/FEB_IO_ICS.h:
 ../Core/Inc/FEB_CAN_APPS.h:
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/squareline_ui/ui.h:

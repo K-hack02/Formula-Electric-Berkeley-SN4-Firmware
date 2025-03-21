@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_line   0001209b  00000000  00000000  0003420d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00095cab  00000000  00000000  000462a8  2**0
+ 18 .debug_str    00096035  00000000  00000000  000462a8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000dbf53  2**0
+ 19 .comment      00000043  00000000  00000000  000dc2dd  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00003480  00000000  00000000  000dbf98  2**2
+ 20 .debug_frame  00003480  00000000  00000000  000dc320  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000005a  00000000  00000000  000df418  2**0
+ 21 .debug_line_str 0000005a  00000000  00000000  000df7a0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1427,11 +1427,11 @@ void FEB_CAN_Transmit(CAN_HandleTypeDef *hcan, uint8_t *can_data) {
  8000b38:	6039      	str	r1, [r7, #0]
 
 	// Initialize Transmission Header
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_FEB_DART_TACH_MEASUREMENTS_1234_FRAME_ID;
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_DART_TACH_MEASUREMENTS_1234_FRAME_ID;
  8000b3a:	4b23      	ldr	r3, [pc, #140]	@ (8000bc8 <FEB_CAN_Transmit+0x98>)
- 8000b3c:	220f      	movs	r2, #15
+ 8000b3c:	221e      	movs	r2, #30
  8000b3e:	601a      	str	r2, [r3, #0]
-	FEB_CAN_Tx_Header.IDE = FEB_CAN_FEB_DART_TACH_MEASUREMENTS_1234_IS_EXTENDED;
+	FEB_CAN_Tx_Header.IDE = FEB_CAN_DART_TACH_MEASUREMENTS_1234_IS_EXTENDED;
  8000b40:	4b21      	ldr	r3, [pc, #132]	@ (8000bc8 <FEB_CAN_Transmit+0x98>)
  8000b42:	2200      	movs	r2, #0
  8000b44:	609a      	str	r2, [r3, #8]
@@ -1439,13 +1439,13 @@ void FEB_CAN_Transmit(CAN_HandleTypeDef *hcan, uint8_t *can_data) {
  8000b46:	4b20      	ldr	r3, [pc, #128]	@ (8000bc8 <FEB_CAN_Transmit+0x98>)
  8000b48:	2200      	movs	r2, #0
  8000b4a:	60da      	str	r2, [r3, #12]
-	FEB_CAN_Tx_Header.DLC = FEB_CAN_FEB_DART_TACH_MEASUREMENTS_1234_LENGTH;
+	FEB_CAN_Tx_Header.DLC = FEB_CAN_DART_TACH_MEASUREMENTS_1234_LENGTH;
  8000b4c:	4b1e      	ldr	r3, [pc, #120]	@ (8000bc8 <FEB_CAN_Transmit+0x98>)
  8000b4e:	2208      	movs	r2, #8
  8000b50:	611a      	str	r2, [r3, #16]
 
 	// Configure FEB_CAN_Tx_Data
-    memcpy(FEB_CAN_Tx_Data, can_data, FEB_CAN_FEB_DART_TACH_MEASUREMENTS_1234_LENGTH);
+    memcpy(FEB_CAN_Tx_Data, can_data, FEB_CAN_DART_TACH_MEASUREMENTS_1234_LENGTH);
  8000b52:	4a1e      	ldr	r2, [pc, #120]	@ (8000bcc <FEB_CAN_Transmit+0x9c>)
  8000b54:	683b      	ldr	r3, [r7, #0]
  8000b56:	0010      	movs	r0, r2
@@ -1474,11 +1474,11 @@ void FEB_CAN_Transmit(CAN_HandleTypeDef *hcan, uint8_t *can_data) {
 	}
 
 	// Initialize Transmission Header
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_FEB_DART_TACH_MEASUREMENTS_5_FRAME_ID;
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_DART_TACH_MEASUREMENTS_5_FRAME_ID;
  8000b7c:	4b12      	ldr	r3, [pc, #72]	@ (8000bc8 <FEB_CAN_Transmit+0x98>)
- 8000b7e:	2210      	movs	r2, #16
+ 8000b7e:	221f      	movs	r2, #31
  8000b80:	601a      	str	r2, [r3, #0]
-	FEB_CAN_Tx_Header.IDE = FEB_CAN_FEB_DART_TACH_MEASUREMENTS_5_IS_EXTENDED;
+	FEB_CAN_Tx_Header.IDE = FEB_CAN_DART_TACH_MEASUREMENTS_5_IS_EXTENDED;
  8000b82:	4b11      	ldr	r3, [pc, #68]	@ (8000bc8 <FEB_CAN_Transmit+0x98>)
  8000b84:	2200      	movs	r2, #0
  8000b86:	609a      	str	r2, [r3, #8]
@@ -1486,13 +1486,13 @@ void FEB_CAN_Transmit(CAN_HandleTypeDef *hcan, uint8_t *can_data) {
  8000b88:	4b0f      	ldr	r3, [pc, #60]	@ (8000bc8 <FEB_CAN_Transmit+0x98>)
  8000b8a:	2200      	movs	r2, #0
  8000b8c:	60da      	str	r2, [r3, #12]
-	FEB_CAN_Tx_Header.DLC = FEB_CAN_FEB_DART_TACH_MEASUREMENTS_5_LENGTH;
+	FEB_CAN_Tx_Header.DLC = FEB_CAN_DART_TACH_MEASUREMENTS_5_LENGTH;
  8000b8e:	4b0e      	ldr	r3, [pc, #56]	@ (8000bc8 <FEB_CAN_Transmit+0x98>)
  8000b90:	2202      	movs	r2, #2
  8000b92:	611a      	str	r2, [r3, #16]
 
 	// Configure FEB_CAN_Tx_Data
-    memcpy(FEB_CAN_Tx_Data, can_data + FEB_CAN_FEB_DART_TACH_MEASUREMENTS_1234_LENGTH, FEB_CAN_FEB_DART_TACH_MEASUREMENTS_5_LENGTH);
+    memcpy(FEB_CAN_Tx_Data, can_data + FEB_CAN_DART_TACH_MEASUREMENTS_1234_LENGTH, FEB_CAN_DART_TACH_MEASUREMENTS_5_LENGTH);
  8000b94:	683b      	ldr	r3, [r7, #0]
  8000b96:	3308      	adds	r3, #8
  8000b98:	0019      	movs	r1, r3

@@ -11,16 +11,22 @@
 // ********************************** Functions **********************************
 
 
+// *********************** States ***********************
 typedef enum {
-	FEB_SM_ST_STARTUP,
-	FEB_SM_ST_STANDBY,
-	FEB_SM_ST_BALANCE,
-	FEB_SM_ST_CHARGE,
+	FEB_SM_ST_BOOT,
+	FEB_SM_ST_LV,
+	FEB_SM_ST_ESC,
 	FEB_SM_ST_PRECHARGE,
-	FEB_SM_ST_DRIVE_STANDBY,
+	FEB_SM_ST_ENERGIZED,
 	FEB_SM_ST_DRIVE,
-	FEB_SM_ST_DRIVE_REGEN,
-	FEB_SM_ST_FAULT
+	FEB_SM_ST_FREE,
+	FEB_SM_ST_CHARGING,
+	FEB_SM_ST_BALANCE,
+	FEB_SM_ST_FAULT_BMS,
+	FEB_SM_ST_FAULT_BSPD,
+	FEB_SM_ST_FAULT_IMD,
+	FEB_SM_ST_FAULT_CHARGING,
+	FEB_SM_ST_DEFAULT
 } FEB_SM_ST_t;
 
 uint16_t FEB_CAN_BMS_getTemp();

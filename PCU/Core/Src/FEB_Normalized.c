@@ -1,7 +1,6 @@
 // **************************************** Includes & External ****************************************
 
 #include "FEB_Normalized.h"
-#include "feb_can_dbc.h"
 
 extern CAN_HandleTypeDef hcan1;
 extern ADC_HandleTypeDef hadc1;
@@ -211,7 +210,7 @@ float FEB_Normalized_Brake_Pedals() {
 	final_normalized = final_normalized < 0.05 ? 0 : final_normalized;
 
 
-	if (brake_pres_2 < PRESSURE_START-20) {
+	if (brake_pres_2 < PRESSURE_START - 20) {
 		return 0.0;
 	}
 

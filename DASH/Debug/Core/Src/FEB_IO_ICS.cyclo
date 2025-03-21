@@ -1,6 +1,6 @@
 /Users/zacharyberthillier/FEB/Code/DASH/Drivers/lvgl/src/hal/../draw/../misc/lv_color.h:593:26:lv_color_hex	1
 ../Core/Src/FEB_IO_ICS.c:19:6:FEB_IO_ICS_Init	1
-../Core/Src/FEB_IO_ICS.c:27:6:FEB_IO_ICS_Loop	24
+../Core/Src/FEB_IO_ICS.c:27:6:FEB_IO_ICS_Loop	22
 ../Core/Src/FEB_IO_ICS.c:167:9:set_n_bit	1
 ../Core/Src/FEB_IO_ICS.c:172:6:uint8_to_binary_string	3
 ../Core/Src/FEB_IO_ICS.c:179:6:disable_r2d	1

@@ -1,3 +1,4 @@
+"./Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.o"
 "./Core/Src/FEB_CAN.o"
 "./Core/Src/FEB_CAN_APPS.o"
 "./Core/Src/FEB_CAN_BMS.o"
