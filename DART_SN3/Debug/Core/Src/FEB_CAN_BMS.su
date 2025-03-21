@@ -1,0 +1,2 @@
+../Core/Src/FEB_CAN_BMS.c:10:9:FEB_CAN_BMS_Filter	56	static
+../Core/Src/FEB_CAN_BMS.c:33:6:FEB_CAN_BMS_Process_Message	16	static
