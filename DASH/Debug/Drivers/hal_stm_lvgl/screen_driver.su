@@ -1,0 +1,4 @@
+../Drivers/hal_stm_lvgl/screen_driver.c:49:6:screen_driver_init	8	static
+../Drivers/hal_stm_lvgl/screen_driver.c:70:6:my_stm32_flush_cb	40	static
+../Drivers/hal_stm_lvgl/screen_driver.c:84:6:stm32_flush_cb	48	static
+../Drivers/hal_stm_lvgl/screen_driver.c:114:6:dma2d_copy_area	56	static

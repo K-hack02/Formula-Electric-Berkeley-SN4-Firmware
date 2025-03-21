@@ -1,0 +1,4 @@
+../Core/Src/FEB_CAN_BMS.c:39:13:FEB_CAN_BMS_Get_State	4	static
+../Core/Src/FEB_CAN_BMS.c:46:9:FEB_CAN_BMS_Filter_Config	64	static
+../Core/Src/FEB_CAN_BMS.c:73:6:FEB_CAN_BMS_Store_Msg	16	static
+../Core/Src/FEB_CAN_BMS.c:85:6:FEB_CAN_BMS_is_stale	8	static

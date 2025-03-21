@@ -1,0 +1,2 @@
+../Core/Src/FEB_Radio.c:11:6:FEB_Radio_Setup	4	static
+../Core/Src/FEB_Radio.c:15:6:FEB_Radio_Transmit	72	static

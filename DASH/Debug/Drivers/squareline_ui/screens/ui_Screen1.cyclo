@@ -1,0 +1,9 @@
+../Drivers/squareline_ui/screens/../../lvgl/src/hal/../draw/../misc/lv_color.h:593:26:lv_color_hex	1
+../Drivers/squareline_ui/screens/../../lvgl/src/core/lv_obj_style.h:92:20:lv_obj_remove_style_all	1
+../Drivers/squareline_ui/screens/ui_Screen1.c:4:6:ui_Screen1_screen_init	1
+../Drivers/squareline_ui/screens/ui_Screen1.c:168:6:set_soc_value	19
+../Drivers/squareline_ui/screens/ui_Screen1.c:320:6:set_temp_value	19
+../Drivers/squareline_ui/screens/ui_Screen1.c:466:6:set_speed_value	19
+../Drivers/squareline_ui/screens/ui_Screen1.c:611:6:set_tsal_status	2
+../Drivers/squareline_ui/screens/ui_Screen1.c:624:6:set_bms_status	10
+../Drivers/squareline_ui/screens/ui_Screen1.c:683:6:set_regen_status	2

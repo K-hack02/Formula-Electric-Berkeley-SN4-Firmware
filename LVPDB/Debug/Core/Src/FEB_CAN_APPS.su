@@ -1,0 +1,2 @@
+../Core/Src/FEB_CAN_APPS.c:10:9:FEB_CAN_APPS_Filter	56	static
+../Core/Src/FEB_CAN_APPS.c:61:6:FEB_CAN_APPS_Str_Msg	24	static

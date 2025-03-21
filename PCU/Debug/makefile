@@ -60,8 +60,8 @@ all: main-build
 main-build: PCU.elf secondary-outputs
 
 # Tool invocations
-PCU.elf PCU.map: $(OBJS) $(USER_OBJS) /Users/silverleaf/Silverleaf/FEB_Firmware_SN4_PCU/PCU/STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "PCU.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/silverleaf/Silverleaf/FEB_Firmware_SN4_PCU/PCU/STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PCU.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+PCU.elf PCU.map: $(OBJS) $(USER_OBJS) /Users/zacharyberthillier/FEB/Code/PCU/STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "PCU.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/zacharyberthillier/FEB/Code/PCU/STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PCU.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
