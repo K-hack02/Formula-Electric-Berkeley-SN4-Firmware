@@ -7,26 +7,26 @@ extern UART_HandleTypeDef huart2;
 
 // ********************************** Variables **********************************
 char buf[128];
-uint8_t buf_len; //stolen from Main_Setup (SN2)
+uint8_t buf_len;
 
 // ********************************** Functions **********************************
 
 void FEB_Main_Setup(void){
-	HAL_ADCEx_InjectedStart(&hadc1); //@lovehate - where does this go
-//	FEB_Timer_Init();
-//	FEB_TPS2482_Setup();
-	FEB_CAN_Init(); //FEB_CAN_Init() // The transceiver must be connected otherwise you get sent into an infinite loop
+	HAL_ADCEx_InjectedStart(&hadc1);
+	FEB_CAN_Init();
 	FEB_CAN_RMS_Setup();
 }
 
 void FEB_Main_While(void){
-//	FEB_CAN_ICS_Transmit();
-//
 	FEB_SM_ST_t bms_state = FEB_CAN_BMS_getState();
 
+<<<<<<< HEAD
 
 
 	if (FEB_Ready_To_Drive() && (bms_state == FEB_SM_ST_DRIVE /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/)) {
+=======
+	if (FEB_Ready_To_Drive() && (bms_state == FEB_SM_ST_DRIVE)) {
+>>>>>>> 380dd11ef21051f975633da55bd5b08f708a71c5
 		FEB_Normalized_updateAcc();
 		FEB_CAN_RMS_Process();
 

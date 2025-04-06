@@ -48,16 +48,5 @@ void FEB_HECS_update(){
 	}else{
 		currHigh = false;
 	}
-	//FEB_HECS_indicate();
-}
 
-//void FEB_HECS_indicate(){ //sends GPIO output to HECS Indicator
-//	if (currHigh == true){
-//
-//		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET); // sets GPIO PA5 to high
-//
-//	}else{
-//		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET); //sets GPIPO PA5 to low
-//	}
-////	HAL_Delay(1000);
-//}
+}
