@@ -137,6 +137,46 @@ float FEB_CAN_RMS_getFilteredTorque_Regen(void){
 }
 
 
+
+void FEB_CAN_RMS_Disable_undervolt(void){
+	//Clear fault in case inverter is powered before disable command sent
+	uint8_t fault_clear_addr = 140;
+	uint8_t fault_clear_data = 0;
+
+	//-----Transmit Stuff Below-----
+	// Initialize transmission header
+	FEB_CAN_Tx_Header.DLC = 8;
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_MSG_FRAME_ID; //ID for sending paramater messages for RMS
+	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
+	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
+	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
+
+	// Copy data to Tx buffer
+		// param msg format (little-endian):
+		// 0,1: param addr
+		// 2: r/w cmd
+		// 3: NA
+		// 4,5: data
+		// 6,7: NA
+	FEB_CAN_Tx_Data[0] = fault_clear_addr;
+	FEB_CAN_Tx_Data[1] = 0;
+	FEB_CAN_Tx_Data[2] = 1;
+	FEB_CAN_Tx_Data[3] = 0;
+	FEB_CAN_Tx_Data[4] = fault_clear_data;
+	FEB_CAN_Tx_Data[5] = 0;
+	FEB_CAN_Tx_Data[6] = 0;
+	FEB_CAN_Tx_Data[7] = 0;
+
+	// Delay until mailbox available
+	while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0) {}
+
+	// Add Tx data to mailbox
+	if (HAL_CAN_AddTxMessage(&hcan1, &FEB_CAN_Tx_Header, FEB_CAN_Tx_Data, &FEB_CAN_Tx_Mailbox) != HAL_OK) {
+		//Shutdown error
+	}
+
+}
+
 // Essentially we want our voltage to never drop below 400 to be safe (~2.85V per cell) 
 // To keep 400 as our floor setpoint, we will derate our torque limit based on voltage
 // We will control this by derating our PEAK_CURRENT value. 
@@ -235,7 +275,17 @@ void FEB_CAN_RMS_Torque(void){
 
 // ***** CAN FUNCS ***
 void FEB_CAN_RMS_Init(void){
-	FEB_CAN_RMS_Transmit_paramSafety();
+
+	for(int i = 0; i < 10; i++){
+		FEB_CAN_RMS_Transmit_paramSafety();
+		HAL_Delay(10);
+	}
+
+	for(int i = 0; i < 10; i++){
+		FEB_CAN_RMS_Disable_undervolt();
+		HAL_Delay(10);
+	}
+//	FEB_CAN_RMS_Transmit_paramSafety();
 
 	// send disable command to remove lockout
 	for (int i = 0; i < 10; i++) {
@@ -250,7 +300,7 @@ void FEB_CAN_RMS_Init(void){
 void FEB_CAN_RMS_Transmit_updateTorque(void) { //TODO: Create Custom Transmit function and update below call
   //uint8_t message_data[8] = {RMSControl.torque & 0xFF, RMSControl.torque >> 8, 0, 0, 0, RMSControl.enabled, 0, 0};
 	FEB_CAN_Tx_Header.DLC = 8;
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_COMMAND_MSG_FRAME_ID; //ID for sending paramater messages for RMS
+	FEB_CAN_Tx_Header.StdId = 0xc0; //ID for sending paramater messages for RMS
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;

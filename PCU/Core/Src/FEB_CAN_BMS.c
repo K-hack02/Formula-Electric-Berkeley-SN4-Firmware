@@ -1,6 +1,8 @@
 // ********************************** Includes & External **********************************
 
 #include "FEB_CAN_BMS.h"
+#include "FEB_CAN_Library_SN4/gen/feb_can.h"
+
 
 // *********************************** Struct ************************************
 
@@ -22,7 +24,7 @@ uint16_t FEB_CAN_BMS_getTemp(){
 // ***** CAN FUNCTIONS ****
 
 uint8_t FEB_CAN_BMS_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank) {
-	uint16_t ids[] = {FEB_CAN_ID_BMS_STATE,FEB_CAN_ID_BMS_TEMPERATURE};
+	uint16_t ids[] = {FEB_CAN_BMS_STATE_FRAME_ID,FEB_CAN_BMS_ACCUMULATOR_TEMPERATURE_FRAME_ID};
 
 	for (uint8_t i = 0; i < 1; i++) {
 		CAN_FilterTypeDef filter_config;
@@ -50,11 +52,11 @@ uint8_t FEB_CAN_BMS_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignme
 
 void FEB_CAN_BMS_Store_Msg(CAN_RxHeaderTypeDef* pHeader, uint8_t *RxData) {
     switch (pHeader -> StdId){
-        case FEB_CAN_ID_BMS_TEMPERATURE :
+        case FEB_CAN_BMS_ACCUMULATOR_TEMPERATURE_FRAME_ID :
         	BMS_MESSAGE.temp = RxData[2] << 8 | RxData[3];
             break;
 
-        case FEB_CAN_ID_BMS_STATE:
+        case FEB_CAN_BMS_STATE_FRAME_ID:
             BMS_MESSAGE.status = RxData[0];
             break;
     }

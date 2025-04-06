@@ -10,11 +10,11 @@
 
 #define SLEEP_TIME 10
 
-#define ACC_PEDAL_1_START 1517.0
-#define ACC_PEDAL_1_END 1352.0
+#define ACC_PEDAL_1_START 400.0
+#define ACC_PEDAL_1_END 1900.0
 
-#define ACC_PEDAL_2_START 820.0
-#define ACC_PEDAL_2_END 1806.0
+#define ACC_PEDAL_2_START 400.0
+#define ACC_PEDAL_2_END 1900.0
 
 //#define BRAKE_PEDAL_1_START 1350.0
 //#define BRAKE_PEDAL_1_END 910.0
@@ -25,8 +25,8 @@
 #define BRAKE_PEDAL_2_START 1390.0
 #define BRAKE_PEDAL_2_END 1160.0
 
-#define PRESSURE_START 189.0
-#define PRESSURE_END 1025.0
+#define PRESSURE_START 1000.0
+#define PRESSURE_END 2000.0
 
 // TORQUE COMMAND PARAMS
 #define INIT_VOLTAGE            480     // initial voltage of accumulator (used for capping torque commands) (consider sampling when BMS samples)

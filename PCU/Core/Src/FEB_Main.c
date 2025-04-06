@@ -3,6 +3,7 @@
 #include "FEB_Main.h"
 
 extern ADC_HandleTypeDef hadc1;
+extern UART_HandleTypeDef huart2;
 
 // ********************************** Variables **********************************
 char buf[128];
@@ -22,6 +23,8 @@ void FEB_Main_While(void){
 //	FEB_CAN_ICS_Transmit();
 //
 	FEB_SM_ST_t bms_state = FEB_CAN_BMS_getState();
+
+
 
 	if (FEB_Ready_To_Drive() && (bms_state == FEB_SM_ST_DRIVE /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/)) {
 		FEB_Normalized_updateAcc();

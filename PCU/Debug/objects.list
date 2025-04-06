@@ -1,5 +1,4 @@
 "./Core/Inc/FEB_CAN_Library_SN4/gen/feb_can.o"
-"./Core/Src/FEB_CAN.o"
 "./Core/Src/FEB_CAN_BMS.o"
 "./Core/Src/FEB_CAN_BSPD.o"
 "./Core/Src/FEB_CAN_ICS.o"
@@ -11,6 +10,7 @@
 "./Core/Src/FEB_TPS2482.o"
 "./Core/Src/FEB_Timer.o"
 "./Core/Src/TPS2482.o"
+"./Core/Src/feb_can.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32f4xx_hal_msp.o"
 "./Core/Src/stm32f4xx_it.o"

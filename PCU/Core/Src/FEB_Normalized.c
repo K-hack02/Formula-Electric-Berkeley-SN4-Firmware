@@ -143,16 +143,13 @@ void FEB_Normalized_updateAcc(){
 float FEB_Normalized_Acc_Pedals() {
 	// raw ADC readings of the two acc pedal sensors
 	uint16_t acc_pedal_1 = FEB_Read_ADC(ACC_PEDAL_1);
-	uint16_t acc_pedal_2 = FEB_Read_ADC(ACC_PEDAL_2);
-	char buf[128];
-	uint8_t buf_len;
-	buf_len = sprintf(buf, "acc1:%d acc2:%d\n", acc_pedal_1, acc_pedal_2);
-//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
+	uint16_t acc_pedal_2 = FEB_Read_ADC(ACC_PEDAL_1);
+
 
 
 	// check implausibility for shorting. TODO: check if this fulfills the short circuiting rules.
-	if (acc_pedal_1 < ACC_PEDAL_1_END - 20 || acc_pedal_1 > ACC_PEDAL_1_START + 20
-			|| acc_pedal_2 < ACC_PEDAL_2_START - 50 || acc_pedal_2 > ACC_PEDAL_2_END + 50) {
+	if (acc_pedal_1 > ACC_PEDAL_1_END + 20 || acc_pedal_1 < ACC_PEDAL_1_START - 20
+			|| acc_pedal_2 < ACC_PEDAL_2_START - 20 || acc_pedal_2 > ACC_PEDAL_2_END + 20) {
 		isImpl = true;
 		return 0.0;
 	}
@@ -162,6 +159,11 @@ float FEB_Normalized_Acc_Pedals() {
 	float ped1_normalized = (acc_pedal_1 - ACC_PEDAL_1_START)/ (ACC_PEDAL_1_END - ACC_PEDAL_1_START);
 	// sensor 2 has negative slope
 	float ped2_normalized = (acc_pedal_2 - ACC_PEDAL_2_START) / (ACC_PEDAL_2_END - ACC_PEDAL_2_START);
+
+	char buf[128];
+	uint8_t buf_len;
+	buf_len = sprintf(buf, "acc1:%f\n\r", ped1_normalized);
+	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
 
 	// sensor measurements mismatch by more than 10%
 	if(abs(ped1_normalized - ped2_normalized) > 0.1 ){

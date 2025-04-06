@@ -1,6 +1,7 @@
 // **************************************** Includes ****************************************
 
 #include "FEB_CAN_ICS.h"
+#include "FEB_CAN_Library_SN4/gen/feb_can.h"
 
 extern CAN_HandleTypeDef hcan1;
 extern CAN_TxHeaderTypeDef FEB_CAN_Tx_Header;
@@ -17,7 +18,7 @@ static bool READY_TO_DRIVE = false;
 uint8_t FEB_CAN_ICS_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank) {
     // For multiple filters, create array of filter IDs and loop over IDs.
 
-	uint16_t ids[] = {FEB_CAN_ID_ICS_BUTTON_STATE};
+	uint16_t ids[] = {FEB_CAN_DASH_MESSAGE_FRAME_ID};
 
 	for (uint8_t i = 0; i < 1; i++) {
 		CAN_FilterTypeDef filter_config;
@@ -45,22 +46,24 @@ uint8_t FEB_CAN_ICS_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uin
 
 void FEB_CAN_ICS_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
 	switch(rx_header->StdId) {
-		case FEB_CAN_ID_ICS_BUTTON_STATE:
+		case FEB_CAN_DASH_MESSAGE_FRAME_ID:
 //				READY_TO_DRIVE = ((rx_data[0] | 0b11111101) == 0b11111111);
 //				break;
 
 			bool current_button_state = ((rx_data[0] | 0b11111101) == 0b11111111);
 
+			READY_TO_DRIVE = current_button_state;
 
-			if (READY_TO_DRIVE && !previous_button_state && current_button_state) {
-				READY_TO_DRIVE = false;  // return to energized state
-			}
-
-			else if (!READY_TO_DRIVE && !previous_button_state && current_button_state) {
-				READY_TO_DRIVE = true;   // enter ready to drive state
-			}
-
-			previous_button_state = current_button_state;
+//
+//			if (READY_TO_DRIVE && !previous_button_state && current_button_state) {
+//				READY_TO_DRIVE = false;  // return to energized state
+//			}
+//
+//			else if (!READY_TO_DRIVE && !previous_button_state && current_button_state) {
+//				READY_TO_DRIVE = true;   // enter ready to drive state
+//			}
+//
+//			previous_button_state = current_button_state;
 			break;
 	}
 }
