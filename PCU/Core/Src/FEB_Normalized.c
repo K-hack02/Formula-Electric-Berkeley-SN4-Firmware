@@ -171,8 +171,19 @@ float FEB_Normalized_Acc_Pedals() {
 
 	float final_normalized = 0.5*(ped1_normalized + ped2_normalized);
 
+	float normalizedTrigger = 0.1; // portion of pedal we can press before we trigger a the soft BSPD
+	float timeThreshold = 1000; // amount of cycles that needs to elapse before trigger, 12.5 nanoseconds / cycle
 
-//	 Implausiblity check if both pedals are stepped
+	float time = 0.0;
+	// Soft BSPD
+	if (final_normalized >= normalizedTrigger) {
+		time++;
+		if (time > timeThreshold) {
+			return 0.0;
+		}
+	}
+
+	// Implausiblity check if both pedals are stepped
 	if (normalized_brake > 0.2 && normalized_acc > 0.1) {
 		isImpl = true;
 	}
@@ -182,10 +193,13 @@ float FEB_Normalized_Acc_Pedals() {
 		isImpl = false;
 	}
 
+
 	if (!isImpl) {
 		final_normalized = final_normalized > 1 ? 1 : final_normalized;
 		final_normalized = final_normalized < 0.05 ? 0 : final_normalized;
 		return final_normalized;
+
+
 	} else {
 		return 0.0;
 	}
