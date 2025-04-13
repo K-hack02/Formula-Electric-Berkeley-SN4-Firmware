@@ -31,5 +31,6 @@ void FEB_Normalized_update_Brake();
 float FEB_Normalized_Brake_Pedals();
 void FEB_Normalized_CAN_sendBrake();
 void FEB_Normalized_Test_Acc();
+void FEB_Soft_BSPD();
 
 #endif /* INC_FEB_NORMALIZED_H_ */

@@ -34,6 +34,9 @@ void FEB_Main_While(void){
 		FEB_Normalized_setAcc0();
 		FEB_CAN_RMS_Disable();
 	}
+	// TESTING
+	FEB_Normalized_updateAcc();
+	FEB_CAN_RMS_Process();
 
 	FEB_HECS_update();
 

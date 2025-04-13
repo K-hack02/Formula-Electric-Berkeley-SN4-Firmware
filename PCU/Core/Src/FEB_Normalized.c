@@ -24,7 +24,10 @@ const uint16_t Sensor_Max = 4095.0/5.0*4.5;
 float normalized_acc;
 float normalized_brake;
 bool isImpl = false;
-float time = 0.0;
+//float time = 0.0;
+
+//float normalizedTrigger = 0.1; // portion of brake pedal we can press before we trigger a the soft BSPD
+//float timeThreshold = 1000; // amount of cycles that needs to elapse before trigger, 12.5 nanoseconds / cycle
 
 // **************************************** Functions ****************************************
 
@@ -137,7 +140,7 @@ void FEB_Normalized_updateAcc(){
 	char buf[128];
 	uint8_t buf_len;
 	buf_len = sprintf(buf, "normalized_acc: %f\n", normalized_acc);
-	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
 
 }
 
@@ -161,10 +164,7 @@ float FEB_Normalized_Acc_Pedals() {
 	// sensor 2 has negative slope
 	float ped2_normalized = (acc_pedal_2 - ACC_PEDAL_2_START) / (ACC_PEDAL_2_END - ACC_PEDAL_2_START);
 
-	char buf[128];
-	uint8_t buf_len;
-	buf_len = sprintf(buf, "acc1:%f\n\r", ped1_normalized);
-	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
+
 
 	// sensor measurements mismatch by more than 10%
 	if(abs(ped1_normalized - ped2_normalized) > 0.1 ){
@@ -172,18 +172,44 @@ float FEB_Normalized_Acc_Pedals() {
 		return 0.0;
 	}
 
-	float final_normalized = 0.5*(ped1_normalized + ped2_normalized);
+	float final_normalized = 0.5 * (ped1_normalized + ped2_normalized);
 
-	float normalizedTrigger = 0.1; // portion of pedal we can press before we trigger a the soft BSPD
-	float timeThreshold = 1000; // amount of cycles that needs to elapse before trigger, 12.5 nanoseconds / cycle
+//	float normalizedTrigger = 0.1; // portion of brake pedal we can press before we trigger a the soft BSPD
+//	float timeThreshold = 1000; // amount of cycles that needs to elapse before trigger, 12.5 nanoseconds / cycle
+//
+//	// Soft BSPD
+//	char buf[128];
+//	uint8_t buf_len;
+//	buf_len = sprintf(buf, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
+//
+//	if (final_normalized >= normalizedTrigger) {
+//		time++;
+//		bspdFlag = 0.0;
+//
+//		char buf[128];
+//		uint8_t buf_len;
+//	//	buf_len = sprintf(buf, "acc1_norm, acc2_norm, combined_norm:%f, %f, %f\n\r", ped1_normalized, ped2_normalized, final_normalized);
+//		buf_len = sprintf(buf, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
+//
+//		HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
+//		if (time > timeThreshold) {
+////			time = 0;
+//			bspdFlag = 1.0;
+//			return 0.0;
+//		}
+//	}
 
-	// Soft BSPD
-	if (final_normalized >= normalizedTrigger) {
-		time++;
-		if (time > timeThreshold) {
-			time = 0;
-			return 0.0;
-		}
+
+	// PA7 pin
+	GPIO_PinState bspd_reading = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
+//	unsigned char buf[128];
+//	uint8_t buf_len;
+//	buf_len = sprintf(buf, "pin state:%u\n\r", (uint8_t) bspd_reading);
+//	HAL_UART_Transmit(&huart2, buf, buf_len, HAL_MAX_DELAY);
+
+	if ((uint8_t) bspd_reading == 1) { // correct is low
+		normalized_acc = 0.0;
 	}
 
 	// Implausiblity check if both pedals are stepped
@@ -235,10 +261,34 @@ float FEB_Normalized_Brake_Pedals() {
 	uint8_t buf_len;
 	buf_len = sprintf(buf, "brake_Pos: %f\n", final_normalized);
 
-	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
+
+	// Soft BSPD
+//	char buf1[1];
+//	uint8_t buf_len1;
+//	buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
+//
+//	if (final_normalized >= normalizedTrigger) {
+//		time++;
+//		bspdFlag = 0.0;
+//
+//	//	buf_len1 = sprintf(buf1, "acc1_norm, acc2_norm, combined_norm:%f, %f, %f\n\r", ped1_normalized, ped2_normalized, final_normalized);
+//		buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
+//		HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
+//
+//		if (time > timeThreshold) {
+////			time = 0;
+//			bspdFlag = 1.0;
+//			buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
+//			HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
+//			return 0.0;
+//		}
+//	}
 
 	return final_normalized;
 }
+
 
 void FEB_Normalized_CAN_sendBrake() {
 	// Initialize transmission header

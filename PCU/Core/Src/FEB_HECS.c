@@ -41,7 +41,7 @@ void FEB_HECS_update(){
 	char buf[128];
 	uint8_t buf_len;
 	buf_len = sprintf(buf, "HECS Current:%d, %d, %d, %d, %d\n\r", current_HECS,current_ACC1,current_BRAKE1,current_ACC2,current_BRAKE2);
-	HAL_UART_Transmit(&huart2, buf, strlen(buf), HAL_MAX_DELAY);
+//	HAL_UART_Transmit(&huart2, buf, strlen(buf), HAL_MAX_DELAY);
 
 	if (current_HECS >= HECS_CURRENT){ //checks if current is above value (to be determined)
 		currHigh = true;
