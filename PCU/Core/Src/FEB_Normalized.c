@@ -164,6 +164,10 @@ float FEB_Normalized_Acc_Pedals() {
 	// sensor 2 has negative slope
 	float ped2_normalized = (acc_pedal_2 - ACC_PEDAL_2_START) / (ACC_PEDAL_2_END - ACC_PEDAL_2_START);
 
+	// print out values
+	char msg[100];
+	snprintf(msg, sizeof(msg), "Pedal1: %.3f | Pedal2: %.3f\r\n", ped1_normalized, ped2_normalized);
+	HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
 
 
 	// sensor measurements mismatch by more than 10%
@@ -173,32 +177,6 @@ float FEB_Normalized_Acc_Pedals() {
 	}
 
 	float final_normalized = 0.5 * (ped1_normalized + ped2_normalized);
-
-//	float normalizedTrigger = 0.1; // portion of brake pedal we can press before we trigger a the soft BSPD
-//	float timeThreshold = 1000; // amount of cycles that needs to elapse before trigger, 12.5 nanoseconds / cycle
-//
-//	// Soft BSPD
-//	char buf[128];
-//	uint8_t buf_len;
-//	buf_len = sprintf(buf, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
-//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
-//
-//	if (final_normalized >= normalizedTrigger) {
-//		time++;
-//		bspdFlag = 0.0;
-//
-//		char buf[128];
-//		uint8_t buf_len;
-//	//	buf_len = sprintf(buf, "acc1_norm, acc2_norm, combined_norm:%f, %f, %f\n\r", ped1_normalized, ped2_normalized, final_normalized);
-//		buf_len = sprintf(buf, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
-//
-//		HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
-//		if (time > timeThreshold) {
-////			time = 0;
-//			bspdFlag = 1.0;
-//			return 0.0;
-//		}
-//	}
 
 
 	// PA7 pin

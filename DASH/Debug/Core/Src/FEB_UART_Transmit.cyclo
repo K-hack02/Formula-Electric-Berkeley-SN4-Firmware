@@ -1,4 +1,0 @@
-../Core/Src/FEB_UART_Transmit.c:13:6:FEB_UART_Transmit_Int	1
-../Core/Src/FEB_UART_Transmit.c:21:6:FEB_UART_Transmit_String	1
-../Core/Src/FEB_UART_Transmit.c:29:6:FEB_UART_Transmit_Process	1
-../Core/Src/FEB_UART_Transmit.c:39:6:FEB_UART_Transmit_Speed	1

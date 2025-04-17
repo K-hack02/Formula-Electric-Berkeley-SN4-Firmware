@@ -1,2 +1,0 @@
-../Drivers/hal_stm_lvgl/touch_sensor_driver.c:17:6:touch_sensor_driver_init	1
-../Drivers/hal_stm_lvgl/touch_sensor_driver.c:29:13:stm32_touchpad_read_cb	2

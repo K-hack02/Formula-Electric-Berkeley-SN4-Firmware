@@ -1,5 +1,0 @@
-../Core/Src/FEB_CAN.c:29:6:FEB_CAN_Init	1
-../Core/Src/FEB_CAN.c:42:6:FEB_CAN_Filter_Config	1
-../Core/Src/FEB_CAN.c:50:9:FEB_CAN_Filter	1
-../Core/Src/FEB_CAN.c:75:6:HAL_CAN_RxFifo0MsgPendingCallback	2
-../Core/Src/FEB_CAN.c:96:6:FEB_CAN_Transmit	2

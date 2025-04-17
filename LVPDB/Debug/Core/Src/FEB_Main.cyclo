@@ -1,8 +1,0 @@
-../Core/Src/FEB_Main.c:88:6:FEB_Main_Setup	9
-../Core/Src/FEB_Main.c:159:6:FEB_Main_Loop	1
-../Core/Src/FEB_Main.c:193:6:FEB_1ms_Callback	2
-../Core/Src/FEB_Main.c:239:6:FEB_CAN1_Rx_Callback	3
-../Core/Src/FEB_Main.c:283:13:FEB_Compose_CAN_Data	1
-../Core/Src/FEB_Main.c:299:13:FEB_Current_IIR	3
-../Core/Src/FEB_Main.c:317:13:FEB_Variable_Conversion	10
-../Core/Src/FEB_Main.c:335:13:FEB_Variable_Init	2

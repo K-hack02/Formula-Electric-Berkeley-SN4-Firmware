@@ -1,4 +1,0 @@
-../Core/Src/FEB_CAN_APPS.c:10:9:FEB_CAN_APPS_Filter	2
-../Core/Src/FEB_CAN_APPS.c:63:6:FEB_CAN_APPS_Str_Msg	5
-../Core/Src/FEB_CAN_APPS.c:91:9:FEB_CAN_APPS_Get_Brake_Pos	1
-../Core/Src/FEB_CAN_APPS.c:96:9:FEB_CAN_APPS_Get_Enabled	1

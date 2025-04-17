@@ -1,3 +1,0 @@
-../Core/Src/FEB_CAN_ICS.c:17:9:FEB_CAN_ICS_Filter	2
-../Core/Src/FEB_CAN_ICS.c:65:6:FEB_CAN_ICS_Rx_Handler	8
-../Core/Src/FEB_CAN_ICS.c:96:6:FEB_CAN_ICS_Transmit_Button_State	2
