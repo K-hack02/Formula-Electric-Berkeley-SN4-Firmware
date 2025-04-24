@@ -181,10 +181,7 @@ float FEB_Normalized_Acc_Pedals() {
 
 	// PA7 pin
 	GPIO_PinState bspd_reading = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
-//	unsigned char buf[128];
-//	uint8_t buf_len;
-//	buf_len = sprintf(buf, "pin state:%u\n\r", (uint8_t) bspd_reading);
-//	HAL_UART_Transmit(&huart2, buf, buf_len, HAL_MAX_DELAY);
+
 
 	if ((uint8_t) bspd_reading == 1) { // correct is low
 		normalized_acc = 0.0;
@@ -252,7 +249,6 @@ void FEB_Normalized_CAN_sendBrake() {
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
 
 	// Copy data to Tx buffer. This might be incorrect. It's possible you have to do some bit shifting
-//	memcpy(FEB_CAN_Tx_Data, &normalized_brake, sizeof(float));
 	FEB_Normalized_update_Brake();
 	memcpy(FEB_CAN_Tx_Data, &normalized_brake, sizeof(float)); // maybe?
 	uint8_t converted_brake_val = (uint8_t)(normalized_brake * 100);

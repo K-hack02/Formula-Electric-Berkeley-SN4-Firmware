@@ -47,14 +47,6 @@ void FEB_CAN_RMS_Disable(void){
 
 #define min(x1, x2) x1 < x2 ? x1 : x2;
 
-//void FEB_CAN_RMS_torqueTransmit(void){
-//	//	  buf_len = sprintf(buf, "rtd:%d, enable:%d lockout:%d impl:%d acc: %.3f brake: %.3f Bus Voltage: %d Motor Speed: %d\n", SW_MESSAGE.ready_to_drive, Inverter_enable, Inverter_enable_lockout, isImpl, normalized_acc, normalized_brake, RMS_MESSAGE.HV_Bus_Voltage, RMS_MESSAGE.Motor_Speed);
-//
-//		  buf_len = sprintf(buf, "Evan's Max Torque: %d\n", FEB_CAN_RMS_getMaxTorque());
-//		  HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, 1000);
-//		  HAL_Delay(SLEEP_TIME);
-//}
-
 
 // ****** REGEN FUNCTIONS ****
 
@@ -202,11 +194,6 @@ float FEB_get_peak_current_delimiter()
 		return (10.0 / PEAK_CURRENT); // limit to only 10A 
 	}
 
-	// TODO: add a low-pass filter on this value if speed oscillates at high power
-
-	//   x0    y0            x1    y1
-	// (460V, 60/60A) and (410V, 10/60A)
-
 	//      m   = (        y_1           -              y_0)              / (x_1 -          x_0)
 	float slope = ((10.0 / PEAK_CURRENT) - (PEAK_CURRENT / PEAK_CURRENT)) / (410.0 - (start_derating_voltage));
 	//      y     =   m     (       x            -          x_0          ) + y_0
@@ -233,42 +220,9 @@ void FEB_CAN_RMS_Torque(void){
 	FEB_SM_ST_t current_BMS_state = FEB_CAN_BMS_getState(); // TODO: FOR ALEX
 	float accPos = FEB_Normalized_Acc_Pedals();
 	float brkPos = FEB_Normalized_getBrake();
-//	if (brkPos > BRAKE_POSITION_THRESH) // brake identified
-//	{
-//		if ((current_BMS_state == FEB_SM_ST_DRIVE_REGEN))
-//		{
-//		    // Brake detected, regen allowed
-//			// Multiply by -1 to regen (opposite direction)
-//			RMSControl.torque = -1 * 10 * brkPos * FEB_CAN_RMS_getFilteredTorque_Regen();
-//		}
-//		else
-//		{
-//			// Brake detected, but regen not allowed -> command 0 torque
-//			RMSControl.torque = 0;
-//		}
-//	}
-//	else
-//	{
-//	    if ((current_BMS_state == FEB_SM_ST_DRIVE) ||
-//	        (current_BMS_state == FEB_SM_ST_DRIVE_REGEN))
-//	    {
-//	        // No braking detected, send throttle command
-//    		RMSControl.torque = 10 * accPos * FEB_CAN_RMS_getMaxTorque();
-//	    }
-//	    else
-//	    {
-//	        // No braking detected, but driving not allowed by BMS state
-//	        RMSControl.torque = 0;
-//	    }
-//	}
+
 	RMSControl.torque = 10 * accPos * FEB_CAN_RMS_getMaxTorque(); // temp
-//	int16_t max_torque = 10 * accPos * FEB_CAN_RMS_getMaxTorque();
-//
-//	char buf[100];
-//	sprintf(buf, "Torque: %d\n", max_torque);
-//	HAL_UART_Transmit(&huart2, buf, strlen(buf), 100);
-//
-//	RMSControl.torque= max_torque;
+
 
 	FEB_CAN_RMS_Transmit_updateTorque();
 }
@@ -285,7 +239,7 @@ void FEB_CAN_RMS_Init(void){
 		FEB_CAN_RMS_Disable_undervolt();
 		HAL_Delay(10);
 	}
-//	FEB_CAN_RMS_Transmit_paramSafety();
+
 
 	// send disable command to remove lockout
 	for (int i = 0; i < 10; i++) {
@@ -439,9 +393,6 @@ void FEB_CAN_RMS_Transmit_paramBroadcast(void){
 	uint8_t param_addr = 148;
 	uint8_t CAN_active_msg_byte4 = 0b10100000; // motor position, input voltage
 	uint8_t CAN_active_msg_byte5 = 0b00010101; // flux info (dq axes), torque/timer info, internal states
-//	uint8_t CAN_active_msg_byte4 = 0xff; // literally log everything
-//	uint8_t CAN_active_msg_byte5 = 0xff;
-//	uint8_t broadcast_msg[8] = {param_addr, 0, 1, 0, CAN_active_msg_byte4, CAN_active_msg_byte5, 0, 0};
 
 	// Initialize transmission header
 	FEB_CAN_Tx_Header.DLC = 8;
