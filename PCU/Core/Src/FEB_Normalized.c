@@ -222,9 +222,8 @@ void FEB_Normalized_update_Brake() {
 
 float FEB_Normalized_Brake_Pedals() {
 	//TODO: This might need to change based on which sensor ends up getting used.
-	uint16_t brake_pres_2 =  FEB_Read_ADC(BRAKE_PRESS_2);   //HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
+	uint16_t brake_pres_2 =  FEB_Read_ADC(BRAKE_PRESS_2);
 
-//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
 
 	float final_normalized = (brake_pres_2 - PRESSURE_START)/ (PRESSURE_END - PRESSURE_START);
 	final_normalized = final_normalized > 1 ? 1 : final_normalized;
@@ -239,30 +238,6 @@ float FEB_Normalized_Brake_Pedals() {
 	uint8_t buf_len;
 	buf_len = sprintf(buf, "brake_Pos: %f\n", final_normalized);
 
-//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
-
-	// Soft BSPD
-//	char buf1[1];
-//	uint8_t buf_len1;
-//	buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
-//	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
-//
-//	if (final_normalized >= normalizedTrigger) {
-//		time++;
-//		bspdFlag = 0.0;
-//
-//	//	buf_len1 = sprintf(buf1, "acc1_norm, acc2_norm, combined_norm:%f, %f, %f\n\r", ped1_normalized, ped2_normalized, final_normalized);
-//		buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
-//		HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
-//
-//		if (time > timeThreshold) {
-////			time = 0;
-//			bspdFlag = 1.0;
-//			buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
-//			HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
-//			return 0.0;
-//		}
-//	}
 
 	return final_normalized;
 }
