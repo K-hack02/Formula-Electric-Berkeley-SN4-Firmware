@@ -26,6 +26,15 @@ void FEB_Main_While(void){
 	if (FEB_Ready_To_Drive() && (bms_state == FEB_SM_ST_DRIVE /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/)) {
 		FEB_Normalized_updateAcc();
 		FEB_CAN_RMS_Process();
+		if (currentTime - lastTPS2482ReadTime >= TPS2482_MONITOR_INTERVAL) {
+			FEB_TPS2482_sendReadings();
+
+				// should check for errors here
+
+				lastTPS2482ReadTime = currentTime;
+			}
+
+			HAL_Delay(10);
 
 	} else {
 		FEB_Normalized_setAcc0();
