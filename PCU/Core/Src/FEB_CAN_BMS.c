@@ -9,6 +9,7 @@
 typedef struct BMS_MESSAGE_TYPE {
     uint16_t temp;
     FEB_SM_ST_t status;
+    uint8_t device_select; // ping message
 
 } BMS_MESSAGE_TYPE;
 BMS_MESSAGE_TYPE BMS_MESSAGE;
@@ -17,6 +18,10 @@ BMS_MESSAGE_TYPE BMS_MESSAGE;
 
 uint16_t FEB_CAN_BMS_getTemp(){
 	return BMS_MESSAGE.temp;
+}
+
+uint8_t FEB_CAN_BMS_getDeviceSelect() {
+	return BMS_MESSAGE.device_select;
 }
 
 
@@ -59,6 +64,7 @@ void FEB_CAN_BMS_Store_Msg(CAN_RxHeaderTypeDef* pHeader, uint8_t *RxData) {
         case FEB_CAN_BMS_STATE_FRAME_ID:
             BMS_MESSAGE.status = RxData[0];
             break;
+
     }
 }
 

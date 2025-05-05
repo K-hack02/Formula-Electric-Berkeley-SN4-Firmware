@@ -138,7 +138,7 @@ void FEB_CAN_RMS_Disable_undervolt(void){
 	//-----Transmit Stuff Below-----
 	// Initialize transmission header
 	FEB_CAN_Tx_Header.DLC = 8;
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_MSG_FRAME_ID; //ID for sending paramater messages for RMS
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_FRAME_ID; //ID for sending paramater messages for RMS
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
@@ -318,7 +318,7 @@ void FEB_CAN_RMS_Transmit_paramSafety(void){
 	//-----Transmit Stuff Below-----
 	// Initialize transmission header
 	FEB_CAN_Tx_Header.DLC = 8;
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_MSG_FRAME_ID; //ID for sending paramater messages for RMS
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_FRAME_ID; //ID for sending paramater messages for RMS
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
@@ -356,7 +356,7 @@ void FEB_CAN_RMS_Transmit_commDisable(void){
 
 	// Initialize transmission header
 	FEB_CAN_Tx_Header.DLC = 8;
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_MSG_FRAME_ID; //ID for sending command messages for RMS
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_FRAME_ID; //ID for sending command messages for RMS
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
@@ -396,7 +396,7 @@ void FEB_CAN_RMS_Transmit_paramBroadcast(void){
 
 	// Initialize transmission header
 	FEB_CAN_Tx_Header.DLC = 8;
-	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_MSG_FRAME_ID; //ID for sending paramater messages for RMS
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_RMS_PARAM_FRAME_ID; //ID for sending paramater messages for RMS
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;

@@ -5,9 +5,13 @@
 extern ADC_HandleTypeDef hadc1;
 extern UART_HandleTypeDef huart2;
 
+
+
 // ********************************** Variables **********************************
 char buf[128];
 uint8_t buf_len; //stolen from Main_Setup (SN2)
+
+
 
 // ********************************** Functions **********************************
 
@@ -17,6 +21,7 @@ void FEB_Main_Setup(void){
 //	FEB_TPS2482_Setup();
 	FEB_CAN_Init(); //FEB_CAN_Init() // The transceiver must be connected otherwise you get sent into an infinite loop
 	FEB_CAN_RMS_Setup();
+	FEB_CAN_HEARTBEAT_Init();
 }
 
 void FEB_Main_While(void){
@@ -26,25 +31,26 @@ void FEB_Main_While(void){
 	if (FEB_Ready_To_Drive() && (bms_state == FEB_SM_ST_DRIVE /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/)) {
 		FEB_Normalized_updateAcc();
 		FEB_CAN_RMS_Process();
-		if (currentTime - lastTPS2482ReadTime >= TPS2482_MONITOR_INTERVAL) {
-			FEB_TPS2482_sendReadings();
+//		FEB_TPS2482_sendReadings();
 
-				// should check for errors here
-
-				lastTPS2482ReadTime = currentTime;
-			}
-
-			HAL_Delay(10);
+		HAL_Delay(10);
 
 	} else {
 		FEB_Normalized_setAcc0();
 		FEB_CAN_RMS_Disable();
+	}
+//	FEB_Normalized_updateAcc();
+//	FEB_CAN_RMS_Process();
+
+	if ((bms_state == "FEB_SM_ST_HEALTH_CHECK") || (FEB_CAN_BMS_getDeviceSelect() == 2)) { // change 0 to pcu device number
+		FEB_CAN_HEARTBEAT_Transmit();
 	}
 
 	FEB_HECS_update();
 
 	FEB_CAN_RMS_Torque();
 	FEB_Normalized_CAN_sendBrake();
+//	FEB_CAN_HEARTBEAT_Transmit();
 
 	HAL_Delay(10);
 }
