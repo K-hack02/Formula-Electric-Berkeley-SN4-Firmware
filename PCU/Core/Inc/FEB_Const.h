@@ -10,11 +10,11 @@
 
 #define SLEEP_TIME 10
 
-#define ACC_PEDAL_1_START 400.0
-#define ACC_PEDAL_1_END 1900.0
+#define ACC_PEDAL_1_START 1555.0 //right apps
+#define ACC_PEDAL_1_END 2078.0
 
-#define ACC_PEDAL_2_START 400.0
-#define ACC_PEDAL_2_END 1900.0
+#define ACC_PEDAL_2_START 3032.0 //left apps
+#define ACC_PEDAL_2_END 3665.0
 
 //#define BRAKE_PEDAL_1_START 1350.0
 //#define BRAKE_PEDAL_1_END 910.0
@@ -25,14 +25,14 @@
 #define BRAKE_PEDAL_2_START 1390.0
 #define BRAKE_PEDAL_2_END 1160.0
 
-#define PRESSURE_START 1000.0
-#define PRESSURE_END 2000.0
+#define PRESSURE_START_1 382.0
+#define PRESSURE_END_1 2000.0
 
 // TORQUE COMMAND PARAMS
 #define INIT_VOLTAGE            480     // initial voltage of accumulator (used for capping torque commands) (consider sampling when BMS samples)
 #define PEAK_CURRENT            52.0      // max DC current (in amps) we want to pull from accumulator
 #define PEAK_CURRENT_REGEN      18.0      // max DC current (in amps) we want to charge the accumulator
-#define MAX_TORQUE              230    // New emrax datasheet says this should be 220???
+#define MAX_TORQUE              25 // 230    // New emrax datasheet says this should be 220???
 #define MAX_TORQUE_REGEN        1300    // User defined constant (equivalent to continuous torque) -- tune to MechE, nominally this doesn't seem to go above 50
 #define RPM_TO_RAD_S            0.10472 // 2 pi / 60
 #define FADE_SPEED_RPM          200.0   // About 3.5mph, don't do regen below here (rely on EEPROM/inverter control loop to properly fade)

@@ -61,6 +61,7 @@ void FEB_Read_Accel_Pedal1() {
 
 	float accel_pedal_1_position = 0.03256 * accel_pedal_1_raw - 13.4;
 
+
 	if (accel_pedal_1_position > 100.0) {
 		accel_pedal_1_position = 100.0;
 	}
@@ -69,16 +70,16 @@ void FEB_Read_Accel_Pedal1() {
 		accel_pedal_1_position = 0.0;
 	}
 
-	int accel_pedal_1_position_int1 = accel_pedal_1_position;
-	float accel_pedal_1_position_frac = accel_pedal_1_position - accel_pedal_1_position_int1;
-	int accel_pedal_1_position_int2 = accel_pedal_1_position_frac * 1000;
+	//int accel_pedal_1_position_int1 = accel_pedal_1_position; //Todo
+	//float accel_pedal_1_position_frac = accel_pedal_1_position - accel_pedal_1_position_int1;
+	//int accel_pedal_1_position_int2 = accel_pedal_1_position_frac * 1000;
 
 	char buf[128];
-	sprintf(buf, "[SENSOR] Accelerator 1 Position RAW: %d\n", accel_pedal_1_raw);
+	sprintf(buf, "[SENSOR] Accelerator 1 Position RAW: %d\n\r", accel_pedal_1_raw);
 	HAL_UART_Transmit(&huart2,(uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
 
 	char buf1[128];
-	sprintf(buf1, "[SENSOR] Accelerator 1 Position: %d.%d%%\n", accel_pedal_1_position_int1, accel_pedal_1_position_int2);
+	sprintf(buf1, "[SENSOR] Accelerator 1 Position: %f\n\r", accel_pedal_1_position);
 	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, strlen(buf1), HAL_MAX_DELAY);
 }
 
@@ -100,11 +101,11 @@ void FEB_Read_Accel_Pedal2() {
 	int accel_pedal_2_position_int2 = accel_pedal_2_position_frac * 1000;
 
 	char buf[128];
-	sprintf(buf, "[SENSOR] Accelerator 2 Position RAW: %d\n", accel_pedal_2_raw);
+	sprintf(buf, "[SENSOR] Accelerator 2 Position RAW: %d\n\r", accel_pedal_2_raw);
 	HAL_UART_Transmit(&huart2,(uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
 
 	char buf1[128];
-	sprintf(buf1, "[SENSOR] Accelerator 2 Position: %d.%d%%\n", accel_pedal_2_position_int1, accel_pedal_2_position_int2);
+	sprintf(buf1, "[SENSOR] Accelerator 2 Position: %d.%d\n\r", accel_pedal_2_position_int1, accel_pedal_2_position_int2);
 	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, strlen(buf1), HAL_MAX_DELAY);
 }
 
@@ -147,9 +148,16 @@ void FEB_Normalized_updateAcc(){
 float FEB_Normalized_Acc_Pedals() {
 	// raw ADC readings of the two acc pedal sensors
 	uint16_t acc_pedal_1 = FEB_Read_ADC(ACC_PEDAL_1);
-	uint16_t acc_pedal_2 = FEB_Read_ADC(ACC_PEDAL_1);
+	uint16_t acc_pedal_2 = FEB_Read_ADC(ACC_PEDAL_2);
 
-
+	//convert to % travel
+	// sensor 1 has positive slope
+	float ped1_normalized = (acc_pedal_1 - ACC_PEDAL_1_START)/ (1.0f*ACC_PEDAL_1_END - ACC_PEDAL_1_START);
+	// sensor 2 has negative slope
+	float ped2_normalized = (acc_pedal_2 - ACC_PEDAL_2_START) / (1.0f*ACC_PEDAL_2_END - ACC_PEDAL_2_START);
+	char msg[100];
+	snprintf(msg, sizeof(msg), "Pedal1: %.3f | Pedal2: %.3f \n\r", ped1_normalized, ped2_normalized);
+	HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
 
 	// check implausibility for shorting. TODO: check if this fulfills the short circuiting rules.
 	if (acc_pedal_1 > ACC_PEDAL_1_END + 20 || acc_pedal_1 < ACC_PEDAL_1_START - 20
@@ -158,16 +166,8 @@ float FEB_Normalized_Acc_Pedals() {
 		return 0.0;
 	}
 
-	//convert to % travel
-	// sensor 1 has positive slope
-	float ped1_normalized = (acc_pedal_1 - ACC_PEDAL_1_START)/ (ACC_PEDAL_1_END - ACC_PEDAL_1_START);
-	// sensor 2 has negative slope
-	float ped2_normalized = (acc_pedal_2 - ACC_PEDAL_2_START) / (ACC_PEDAL_2_END - ACC_PEDAL_2_START);
-
 	// print out values
-	char msg[100];
-	snprintf(msg, sizeof(msg), "Pedal1: %.3f | Pedal2: %.3f\r\n", ped1_normalized, ped2_normalized);
-	HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
+
 
 
 	// sensor measurements mismatch by more than 10%
@@ -176,12 +176,12 @@ float FEB_Normalized_Acc_Pedals() {
 		return 0.0;
 	}
 
-	float final_normalized = 0.5 * (ped1_normalized + ped2_normalized);
-
-
 	// PA7 pin
 	GPIO_PinState bspd_reading = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
-
+//	unsigned char buf[128];
+//	uint8_t buf_len;
+//	buf_len = sprintf(buf, "pin state:%u\n\r", (uint8_t) bspd_reading);
+//	HAL_UART_Transmit(&huart2, buf, buf_len, HAL_MAX_DELAY);
 
 	if ((uint8_t) bspd_reading == 1) { // correct is low
 		normalized_acc = 0.0;
@@ -192,15 +192,15 @@ float FEB_Normalized_Acc_Pedals() {
 		isImpl = true;
 	}
 
+	float final_normalized = 0.5 * (ped1_normalized + ped2_normalized);
+	final_normalized = final_normalized<0?0:(final_normalized>1?1:final_normalized);
+
 	// recover from implausibility if acc pedal is not 5% less
 	if (final_normalized < 0.05 && isImpl) {
 		isImpl = false;
 	}
 
-
 	if (!isImpl) {
-		final_normalized = final_normalized > 1 ? 1 : final_normalized;
-		final_normalized = final_normalized < 0.05 ? 0 : final_normalized;
 		return final_normalized;
 
 
@@ -219,15 +219,16 @@ void FEB_Normalized_update_Brake() {
 
 float FEB_Normalized_Brake_Pedals() {
 	//TODO: This might need to change based on which sensor ends up getting used.
-	uint16_t brake_pres_2 =  FEB_Read_ADC(BRAKE_PRESS_2);
+	uint16_t brake_pres_2 =  FEB_Read_ADC(BRAKE_PRESS_2);   //HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
 
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
 
-	float final_normalized = (brake_pres_2 - PRESSURE_START)/ (PRESSURE_END - PRESSURE_START);
+	float final_normalized = (brake_pres_2 - PRESSURE_START_1)/ (PRESSURE_END_1 - PRESSURE_START_1);
 	final_normalized = final_normalized > 1 ? 1 : final_normalized;
 	final_normalized = final_normalized < 0.05 ? 0 : final_normalized;
 
 
-	if (brake_pres_2 < PRESSURE_START - 20) {
+	if (brake_pres_2 < PRESSURE_START_1 - 20) {
 		return 0.0;
 	}
 
@@ -235,6 +236,30 @@ float FEB_Normalized_Brake_Pedals() {
 	uint8_t buf_len;
 	buf_len = sprintf(buf, "brake_Pos: %f\n", final_normalized);
 
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
+
+	// Soft BSPD
+//	char buf1[1];
+//	uint8_t buf_len1;
+//	buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
+//
+//	if (final_normalized >= normalizedTrigger) {
+//		time++;
+//		bspdFlag = 0.0;
+//
+//	//	buf_len1 = sprintf(buf1, "acc1_norm, acc2_norm, combined_norm:%f, %f, %f\n\r", ped1_normalized, ped2_normalized, final_normalized);
+//		buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
+//		HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
+//
+//		if (time > timeThreshold) {
+////			time = 0;
+//			bspdFlag = 1.0;
+//			buf_len1 = sprintf(buf1, "time, bspd_flag:%f, %f\n\r", time, bspdFlag);
+//			HAL_UART_Transmit(&huart2,(uint8_t *)buf1, buf_len1, HAL_MAX_DELAY);
+//			return 0.0;
+//		}
+//	}
 
 	return final_normalized;
 }
@@ -249,6 +274,7 @@ void FEB_Normalized_CAN_sendBrake() {
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
 
 	// Copy data to Tx buffer. This might be incorrect. It's possible you have to do some bit shifting
+//	memcpy(FEB_CAN_Tx_Data, &normalized_brake, sizeof(float));
 	FEB_Normalized_update_Brake();
 	memcpy(FEB_CAN_Tx_Data, &normalized_brake, sizeof(float)); // maybe?
 	uint8_t converted_brake_val = (uint8_t)(normalized_brake * 100);

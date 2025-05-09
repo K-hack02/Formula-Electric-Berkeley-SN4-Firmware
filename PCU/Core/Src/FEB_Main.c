@@ -19,7 +19,7 @@ static void FEB_Variable_Init(void) {
 	tps2482_i2c_addresses[0] = TPS2482_I2C_ADDR(TPS2482_I2C_ADDR_GND, TPS2482_I2C_ADDR_GND);
 	tps2482_configurations[0].config = TPS2482_CONFIG_DEFAULT;
 	tps2482_configurations[0].mask = TPS2482_MASK_SOL;
-	tps2482_configurations[0].cal = TPS2482_CAL_EQ(TPS2482_CURRENT_LSB_EQ((double)(5)),(double)(.012));
+	tps2482_configurations[0].cal = TPS2482_CAL_EQ(TPS2482_CURRENT_LSB_EQ((double)(4)),(double)(.002));
 }
 
 void FEB_Main_Setup(void){
@@ -56,7 +56,6 @@ void FEB_Main_While(void){
 	FEB_Normalized_CAN_sendBrake();
 //	FEB_CAN_HEARTBEAT_Transmit();
 	FEB_CAN_TPS_Transmit();
-	FEB_CAN_HEARTBEAT_Transmit();
 
 	HAL_Delay(10);
 }

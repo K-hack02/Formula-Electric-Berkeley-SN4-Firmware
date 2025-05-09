@@ -13,13 +13,13 @@ extern uint8_t tps2482_i2c_addresses[1];
 #define SIGN_MAGNITUDE(n)			(int16_t)((((n >> 15) & 0x01) == 1) ? -(n & 0x7FFF) : (n & 0x7FFF)) // for current reg
 
 void FEB_CAN_TPS_Transmit() {
-    uint16_t temp_voltage;
-    TPS2482_Poll_Bus_Voltage(&hi2c1, tps2482_i2c_addresses, (uint16_t *) &temp_voltage, 1);
-    uint16_t temp_current;
-    TPS2482_Poll_Current(&hi2c1, tps2482_i2c_addresses, (uint16_t *) &temp_current, 1);
+    uint16_t voltage_raw;
+    TPS2482_Poll_Bus_Voltage(&hi2c1, tps2482_i2c_addresses, (uint16_t *) &voltage_raw, 1);
+    uint16_t current_raw;
+    TPS2482_Poll_Current(&hi2c1, tps2482_i2c_addresses, (uint16_t *) &current_raw, 1);
 
-    uint16_t other_voltage = FLOAT_TO_UINT16_T(temp_voltage * TPS2482_CONV_VBUS);
-    int16_t other_current = FLOAT_TO_INT16_T(SIGN_MAGNITUDE(temp_current) * TPS2482_CURRENT_LSB_EQ((double)(5)));
+    uint16_t voltage = FLOAT_TO_UINT16_T(voltage_raw * TPS2482_CONV_VBUS);
+    int16_t current = FLOAT_TO_INT16_T(SIGN_MAGNITUDE(current_raw) * TPS2482_CURRENT_LSB_EQ((double)(5)));
 
 	FEB_CAN_Tx_Header.DLC = 4;
 	FEB_CAN_Tx_Header.StdId = FEB_CAN_PCU_TPS_FRAME_ID;
@@ -27,11 +27,13 @@ void FEB_CAN_TPS_Transmit() {
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
 
-
-
 	// Configure FEB_CAN_Tx_Data
-    FEB_CAN_Tx_Data[0] = other_voltage;
-    FEB_CAN_Tx_Data[2] = other_current;
+	for ( int i = 0; i < 8; ++i ) {
+		memset(((uint8_t *)&FEB_CAN_Tx_Data) + i, 0x00, sizeof(uint8_t));
+	}
+
+    memcpy(&FEB_CAN_Tx_Data[0], &voltage, sizeof(uint16_t));
+    memcpy(&FEB_CAN_Tx_Data[2], &current, sizeof(int16_t));
 
     // Write Code Here
 

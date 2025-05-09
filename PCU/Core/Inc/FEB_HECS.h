@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include "FEB_Const.h"
 #include "FEB_Normalized.h"
+#include "main.h"
 #include <stdio.h>
 
 // **************************************** FUNCTIONS ****************************************
