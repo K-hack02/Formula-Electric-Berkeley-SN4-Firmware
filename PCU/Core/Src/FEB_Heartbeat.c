@@ -63,7 +63,9 @@ void FEB_CAN_HEARTBEAT_Transmit() {
 }
 
 void FEB_CAN_HEARTBEAT_Init() {
-	memset(&heartbeat, 0xFF, sizeof(heartbeat));
+	for ( int i = 0; i < 8; ++i ) {
+		memset(((uint8_t *)&heartbeat) + i, 0xFF, sizeof(uint8_t));
+	}
 
 }
 

@@ -3,6 +3,9 @@
 #include "FEB_CAN_RMS.h"
 #include <math.h>
 
+#define FEB_CAN_ID_RMS_VOLTAGE 0xa7
+#define FEB_CAN_ID_RMS_MOTOR 0xa5
+
 extern CAN_HandleTypeDef hcan1;
 extern UART_HandleTypeDef huart2;
 extern uint8_t FEB_CAN_Tx_Data[8];

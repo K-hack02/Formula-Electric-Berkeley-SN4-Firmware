@@ -12,11 +12,12 @@
 #include "FEB_CAN_ICS.h"
 #include "FEB_CAN_BSPD.h"
 #include "FEB_CAN_BMS.h"
+#include "FEB_CAN_TPS.h"
 #include "FEB_Normalized.h"
-#include "FEB_TPS2482.h"
 #include "FEB_HECS.h"
 #include "FEB_CAN_Library_SN4/gen/feb_can.h"
 #include "FEB_CAN_Heartbeat.h"
+#include "TPS2482.h"
 
 
 // ******************************** Functions ********************************

@@ -6,25 +6,37 @@
 
 // *********************************** Struct ************************************
 
+typedef enum {
+	FEB_HB_NULL,
+	FEB_HB_DASH,
+	FEB_HB_PCU,
+	FEB_HB_LVPDB,
+	FEB_HB_DCU,
+	FEB_HB_FSN,
+	FEB_HB_RSN
+} FEB_HB_t;
+
 typedef struct BMS_MESSAGE_TYPE {
     uint16_t temp;
-    FEB_SM_ST_t status;
-    uint8_t device_select; // ping message
+    FEB_SM_ST_t state;
+    FEB_HB_t ping_ack; // ping message
 
 } BMS_MESSAGE_TYPE;
-BMS_MESSAGE_TYPE BMS_MESSAGE;
+BMS_MESSAGE_TYPE bms_message;
 
 // **************************************** Functions ****************************************
 
 uint16_t FEB_CAN_BMS_getTemp(){
-	return BMS_MESSAGE.temp;
+	return bms_message.temp;
 }
 
 uint8_t FEB_CAN_BMS_getDeviceSelect() {
-	return BMS_MESSAGE.device_select;
+	return bms_message.ping_ack;
 }
 
-
+FEB_SM_ST_t FEB_CAN_BMS_getState(){
+	return bms_message.state;
+}
 
 // ***** CAN FUNCTIONS ****
 
@@ -58,19 +70,19 @@ uint8_t FEB_CAN_BMS_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignme
 void FEB_CAN_BMS_Store_Msg(CAN_RxHeaderTypeDef* pHeader, uint8_t *RxData) {
     switch (pHeader -> StdId){
         case FEB_CAN_BMS_ACCUMULATOR_TEMPERATURE_FRAME_ID :
-        	BMS_MESSAGE.temp = RxData[2] << 8 | RxData[3];
+        	bms_message.temp = RxData[2] << 8 | RxData[3];
             break;
 
         case FEB_CAN_BMS_STATE_FRAME_ID:
-            BMS_MESSAGE.status = RxData[0];
+        	bms_message.state = RxData[0] & 0x1F;
+        	bms_message.ping_ack = RxData[0] & 0xE0;
+
+        	if ( bms_message.state == FEB_SM_ST_HEALTH_CHECK || bms_message.ping_ack == FEB_HB_PCU ) {
+        		FEB_CAN_HEARTBEAT_Transmit();
+        	}
+
             break;
-
     }
-}
-
-FEB_SM_ST_t FEB_CAN_BMS_getState(){
-	return BMS_MESSAGE.status;
-
 }
 
 
