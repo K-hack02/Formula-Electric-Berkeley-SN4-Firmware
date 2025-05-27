@@ -282,7 +282,7 @@ uint16_t FEB_Calculate_PSI2() {
 
 void FEB_Normalized_CAN_sendBrake() {
 	// Initialize transmission header
-	FEB_CAN_Tx_Header.DLC = 2;
+	FEB_CAN_Tx_Header.DLC = 5;
 	FEB_CAN_Tx_Header.StdId = FEB_CAN_BRAKE_FRAME_ID;
 	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
