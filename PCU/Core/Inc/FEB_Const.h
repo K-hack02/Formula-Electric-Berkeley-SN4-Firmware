@@ -25,8 +25,10 @@
 #define BRAKE_PEDAL_2_START 1390.0
 #define BRAKE_PEDAL_2_END 1160.0
 
-#define PRESSURE_START_1 382.0
-#define PRESSURE_END_1 2000.0
+#define BRAKE_PRESSURE_START 500.0 * (3.3 / (3.3 * 1.69))
+#define BRAKE_PRESSURE_END 4500.0 * (3.3 / (3.3 * 1.69))
+
+#define ADC_MAX 4095.0
 
 // TORQUE COMMAND PARAMS
 #define INIT_VOLTAGE            480     // initial voltage of accumulator (used for capping torque commands) (consider sampling when BMS samples)
@@ -47,8 +49,9 @@
 
 #define ACC_PEDAL_1 ADC_CHANNEL_1
 #define ACC_PEDAL_2 ADC_CHANNEL_0
-#define BRAKE_PRESS_1 ADC_CHANNEL_13
-#define BRAKE_PRESS_2 ADC_CHANNEL_12
+#define BRAKE_PRESS_1 ADC_CHANNEL_12
+#define BRAKE_PRESS_2 ADC_CHANNEL_13
+#define BRAKE_IN ADC_CHANNEL_14
 #define HECS_SIGNAL ADC_CHANNEL_14
 #define MICRO_SHUTDOWN ADC_CHANNEL_10
 

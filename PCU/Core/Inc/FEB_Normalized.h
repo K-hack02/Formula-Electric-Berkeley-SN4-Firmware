@@ -27,6 +27,8 @@ float FEB_Normalized_Acc_Pedals();
 float FEB_Normalized_getBrake();
 void FEB_Normalized_update_Brake();
 float FEB_Normalized_Brake_Pedals();
+uint16_t FEB_Calculate_PSI1();
+uint16_t FEB_Calculate_PSI2();
 void FEB_Normalized_CAN_sendBrake();
 void FEB_Normalized_Test_Acc();
 void FEB_Soft_BSPD();

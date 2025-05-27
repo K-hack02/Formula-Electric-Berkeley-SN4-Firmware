@@ -23,6 +23,9 @@ const uint16_t Sensor_Max = 4095.0/5.0*4.5;
 
 float normalized_acc;
 float normalized_brake;
+uint16_t psi1; 
+uint16_t psi2; 
+
 bool isImpl = false;
 //float time = 0.0;
 
@@ -110,7 +113,7 @@ void FEB_Read_Accel_Pedal2() {
 }
 
 void FEB_Read_Brake_Pedal() {
-	uint16_t brake_pedal_raw = FEB_Read_ADC(BRAKE_PRESS_1);
+	uint16_t brake_pedal_raw = FEB_Read_ADC(BRAKE_IN);
 
 	float brake_pedal_position = 0.03256 * brake_pedal_raw - 13.4;
 
@@ -215,22 +218,20 @@ float FEB_Normalized_getBrake() {
 
 void FEB_Normalized_update_Brake() {
 	normalized_brake = FEB_Normalized_Brake_Pedals();
+	psi1 = FEB_Calculate_PSI1();
+	psi2 = FEB_Calculate_PSI2();
+
 }
 
 float FEB_Normalized_Brake_Pedals() {
 	//TODO: This might need to change based on which sensor ends up getting used.
-	uint16_t brake_pres_2 =  FEB_Read_ADC(BRAKE_PRESS_2);   //HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
+	uint16_t brake_pres =  FEB_Read_ADC(BRAKE_IN);   //HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
 
 //	HAL_UART_Transmit(&huart2,(uint8_t *)buf, buf_len, HAL_MAX_DELAY);
 
-	float final_normalized = (brake_pres_2 - PRESSURE_START_1)/ (PRESSURE_END_1 - PRESSURE_START_1);
-	final_normalized = final_normalized > 1 ? 1 : final_normalized;
-	final_normalized = final_normalized < 0.05 ? 0 : final_normalized;
-
-
-	if (brake_pres_2 < PRESSURE_START_1 - 20) {
-		return 0.0;
-	}
+	float final_normalized = (brake_pres - BRAKE_PRESSURE_START)/ (BRAKE_PRESSURE_END - BRAKE_PRESSURE_START);
+	// final_normalized = final_normalized > 1 ? 1 : final_normalized;
+	// final_normalized = final_normalized < 0.05 ? 0 : final_normalized;
 
 	char buf[128];
 	uint8_t buf_len;
@@ -264,6 +265,20 @@ float FEB_Normalized_Brake_Pedals() {
 	return final_normalized;
 }
 
+uint16_t FEB_Calculate_PSI1() {
+	uint16_t brake_pres_1 =  FEB_Read_ADC(BRAKE_PRESS_1);
+	float voltage_1 = brake_pres_1 / (3.3 / (3.3 + 1.69));
+	float psi1 = ((voltage_1 - 0.5) / 4.0) * 1000.0;
+	return (uint16_t)(psi1 * 65535.0f);;
+}
+
+uint16_t FEB_Calculate_PSI2() {
+	uint16_t brake_pres_2 =  FEB_Read_ADC(BRAKE_PRESS_2);
+    float voltage_2 = brake_pres_2 / (3.3 / (3.3 + 1.69));
+	float psi2 = ((voltage_2 - 0.5) / 4.0) * 1000.0;
+	return (uint16_t)(psi2 * 65535.0f);;
+}
+
 
 void FEB_Normalized_CAN_sendBrake() {
 	// Initialize transmission header
@@ -280,7 +295,10 @@ void FEB_Normalized_CAN_sendBrake() {
 	uint8_t converted_brake_val = (uint8_t)(normalized_brake * 100);
 
 	FEB_CAN_Tx_Data[0] = converted_brake_val;
-
+	FEB_CAN_Tx_Data[1] = (uint8_t)(psi1 & 0xFF);
+	FEB_CAN_Tx_Data[2] = (uint8_t)((psi1 >> 8) & 0xFF);
+	FEB_CAN_Tx_Data[3] = (uint8_t)(psi2 & 0xFF);
+	FEB_CAN_Tx_Data[4] = (uint8_t)((psi2 >> 8) & 0xFF);
 
 
 	//Debug to see the position of the Brake position sensor

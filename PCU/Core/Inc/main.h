@@ -83,8 +83,8 @@ void Error_Handler(void);
 #define SHUTDOWN_GPIO_Port GPIOA
 #define PTS_HALF_Pin GPIO_PIN_7
 #define PTS_HALF_GPIO_Port GPIOA
-#define brakeIn_Pin GPIO_PIN_4
-#define brakeIn_GPIO_Port GPIOC
+#define brake_in_Pin GPIO_PIN_4
+#define brake_in_GPIO_Port GPIOC
 #define BTS_HALF_Pin GPIO_PIN_5
 #define BTS_HALF_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
