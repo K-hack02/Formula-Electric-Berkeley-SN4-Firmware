@@ -268,15 +268,15 @@ float FEB_Normalized_Brake_Pedals() {
 uint16_t FEB_Calculate_PSI1() {
 	uint16_t brake_pres_1 =  FEB_Read_ADC(BRAKE_PRESS_1);
 	float voltage_1 = brake_pres_1 / (3.3 / (3.3 + 1.69));
-	float psi1 = ((voltage_1 - 0.5) / 4.0) * 1000.0;
-	return (uint16_t)(psi1 * 65535.0f);;
+	float psi1 = ((voltage_1 - 500) / 4000) * 1000.0;
+	return (uint16_t)(psi1);
 }
 
 uint16_t FEB_Calculate_PSI2() {
 	uint16_t brake_pres_2 =  FEB_Read_ADC(BRAKE_PRESS_2);
     float voltage_2 = brake_pres_2 / (3.3 / (3.3 + 1.69));
-	float psi2 = ((voltage_2 - 0.5) / 4.0) * 1000.0;
-	return (uint16_t)(psi2 * 65535.0f);;
+	float psi2 = ((voltage_2 - 500) / 4000) * 1000.0;
+	return (uint16_t)(psi2);;
 }
 
 
