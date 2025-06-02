@@ -32,9 +32,9 @@
 
 // TORQUE COMMAND PARAMS
 #define INIT_VOLTAGE            480     // initial voltage of accumulator (used for capping torque commands) (consider sampling when BMS samples)
-#define PEAK_CURRENT            52.0      // max DC current (in amps) we want to pull from accumulator
-#define PEAK_CURRENT_REGEN      18.0      // max DC current (in amps) we want to charge the accumulator
-#define MAX_TORQUE              200 // 230    // New emrax datasheet says this should be 220???
+#define PEAK_CURRENT            52.0    // max DC current (in amps) we want to pull from accumulator
+#define PEAK_CURRENT_REGEN      18.0    // max DC current (in amps) we want to charge the accumulator
+#define MAX_TORQUE              220     // New emrax datasheet says this should be 220???
 #define MAX_TORQUE_REGEN        1300    // User defined constant (equivalent to continuous torque) -- tune to MechE, nominally this doesn't seem to go above 50
 #define RPM_TO_RAD_S            0.10472 // 2 pi / 60
 #define FADE_SPEED_RPM          200.0   // About 3.5mph, don't do regen below here (rely on EEPROM/inverter control loop to properly fade)
