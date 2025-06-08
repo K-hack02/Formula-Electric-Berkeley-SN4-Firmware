@@ -4,6 +4,7 @@
 // ******************************** Includes ********************************
 
 #include <FEB_CAN.h>
+#include <FEB_CAN_AUTO.h>
 #include <stm32f4xx_hal.h>
 #include <stdint.h>
 
