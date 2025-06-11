@@ -55,9 +55,6 @@ void FEB_Main_While(void){
 
 		FEB_CAN_RMS_Torque();
 
-		FEB_Normalized_CAN_sendBrake();
-	//	FEB_CAN_HEARTBEAT_Transmit();
-		FEB_CAN_TPS_Transmit();
 	} else {
 		if (bms_state == FEB_SM_ST_ENERGIZED) {
 			FEB_CAN_RMS_Process();
@@ -65,13 +62,13 @@ void FEB_Main_While(void){
 			FEB_Normalized_setAcc0();
 			FEB_CAN_RMS_Disable();
 		}
-
-//		FEB_HECS_update();
-
-		FEB_Normalized_CAN_sendBrake();
-
+		
+		FEB_CAN_RMS_AUTO_Torque(torque);
 	}
 
+	FEB_Normalized_CAN_sendBrake();
+	//	FEB_CAN_HEARTBEAT_Transmit();
+	FEB_CAN_TPS_Transmit();
 
 	HAL_Delay(10);
 }

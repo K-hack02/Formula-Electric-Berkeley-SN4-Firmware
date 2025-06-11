@@ -230,6 +230,13 @@ void FEB_CAN_RMS_Torque(void){
 	FEB_CAN_RMS_Transmit_updateTorque();
 }
 
+void FEB_CAN_RMS_AUTO_Torque(uint16_t torque){
+
+	RMSControl.torque = torque; // temp
+
+	FEB_CAN_RMS_Transmit_updateTorque();
+}
+
 // ***** CAN FUNCS ***
 void FEB_CAN_RMS_Init(void){
 

@@ -5,6 +5,7 @@ extern CAN_TxHeaderTypeDef FEB_CAN_Tx_Header;
 extern uint32_t FEB_CAN_Tx_Mailbox;
 extern CAN_HandleTypeDef hcan1; 
 bool auto_on = false;
+uint16_t torque = 0; 
 
 // *********************************** Functions ************************************
 
@@ -38,7 +39,8 @@ uint8_t FEB_CAN_AUTO_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignm
 void FEB_CAN_AUTO_Store_Msg(CAN_RxHeaderTypeDef* pHeader, uint8_t *RxData) {
     switch (pHeader -> StdId){
         case 0x1F3:
-        	auto_on = (RxData[0] && 0x01) == 0x01;
+        	auto_on = (RxData[0] & 0x01) != 0;
+			torque = (RxData[1] << 8) | RxData[2];
             break;
     }
 }
