@@ -38,26 +38,40 @@ void FEB_Main_While(void){
 //	FEB_CAN_ICS_Transmit();
 	FEB_SM_ST_t bms_state = FEB_CAN_BMS_getState();
 
-	if (FEB_Ready_To_Drive() && (bms_state == FEB_SM_ST_DRIVE /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/)) {
-		FEB_Normalized_updateAcc();
-		FEB_CAN_RMS_Process();
-//		FEB_TPS2482_sendReadings();
+	if (!auto_on){
+		if (FEB_Ready_To_Drive() && (bms_state == FEB_SM_ST_DRIVE /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/)) {
+			FEB_Normalized_updateAcc();
+			FEB_CAN_RMS_Process();
+	//		FEB_TPS2482_sendReadings();
 
-	} else {
-		FEB_Normalized_setAcc0();
-		FEB_CAN_RMS_Disable();
-	}
-//	FEB_Normalized_updateAcc();
-//	FEB_CAN_RMS_Process();
+		} else {
+			FEB_Normalized_setAcc0();
+			FEB_CAN_RMS_Disable();
+		}
+	//	FEB_Normalized_updateAcc();
+	//	FEB_CAN_RMS_Process();
 
-	FEB_HECS_update();
+		FEB_HECS_update();
 
-	if (!auto_on) {
 		FEB_CAN_RMS_Torque();
+
+		FEB_Normalized_CAN_sendBrake();
+	//	FEB_CAN_HEARTBEAT_Transmit();
+		FEB_CAN_TPS_Transmit();
+	} else {
+		if (bms_state == FEB_SM_ST_ENERGIZED) {
+			FEB_CAN_RMS_Process();
+		}else {
+			FEB_Normalized_setAcc0();
+			FEB_CAN_RMS_Disable();
+		}
+
+//		FEB_HECS_update();
+
+		FEB_Normalized_CAN_sendBrake();
+
 	}
-	FEB_Normalized_CAN_sendBrake();
-//	FEB_CAN_HEARTBEAT_Transmit();
-	FEB_CAN_TPS_Transmit();
+
 
 	HAL_Delay(10);
 }
