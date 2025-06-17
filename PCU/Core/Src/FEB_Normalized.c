@@ -180,35 +180,60 @@ float FEB_Normalized_Acc_Pedals() {
 	}
 
 	// PA7 pin
-	GPIO_PinState bspd_reading = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
+//	GPIO_PinState bspd_reading = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
 //	unsigned char buf[128];
 //	uint8_t buf_len;
 //	buf_len = sprintf(buf, "pin state:%u\n\r", (uint8_t) bspd_reading);
 //	HAL_UART_Transmit(&huart2, buf, buf_len, HAL_MAX_DELAY);
 
-	if ((uint8_t) bspd_reading == 1) { // correct is low
-		normalized_acc = 0.0;
-	}
+	// if ((uint8_t) bspd_reading == 1) { // correct is low
+	// 	normalized_acc = 0.0;
+	// }
 
-	// Implausiblity check if both pedals are stepped
-	if (normalized_brake > 0.2 && normalized_acc > 0.1) {
+	// // Implausiblity check if both pedals are stepped
+	// if (normalized_brake > 0.2 && normalized_acc > 0.1) {
+	// 	isImpl = true;
+	// }
+
+	// float final_normalized = 0.5 * (ped1_normalized + ped2_normalized);
+	// final_normalized = final_normalized<0?0:(final_normalized>1?1:final_normalized);
+
+	// // recover from implausibility if acc pedal is not 5% less
+	// if (final_normalized < 0.05 && isImpl) {
+	// 	isImpl = false;
+	// }
+
+	// if (!isImpl) {
+	// 	return final_normalized;
+	// } else {
+	// 	return 0.0;
+	// }
+
+	// Calculate final normalized accelerator value
+	float final_normalized = 0.5f * (ped1_normalized + ped2_normalized);
+	final_normalized = (final_normalized < 0.0f) ? 0.0f : (final_normalized > 1.0f ? 1.0f : final_normalized);
+
+	// BSPD digital read protection (active-low)
+	// GPIO_PinState bspd_reading = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
+	// if ((uint8_t)bspd_reading == 1) {
+	// 	final_normalized = 0.0f;
+	// }
+
+	// Brake + accelerator conflict → disable accelerator
+	if (normalized_brake > 0.2f && final_normalized > 0.05f) {
 		isImpl = true;
 	}
 
-	float final_normalized = 0.5 * (ped1_normalized + ped2_normalized);
-	final_normalized = final_normalized<0?0:(final_normalized>1?1:final_normalized);
-
-	// recover from implausibility if acc pedal is not 5% less
-	if (final_normalized < 0.05 && isImpl) {
+	// Only recover once both pedals are fully released
+	if (final_normalized < 0.05f && normalized_brake < 0.15f && isImpl) {
 		isImpl = false;
 	}
 
+	// Apply implausibility override
 	if (!isImpl) {
 		return final_normalized;
-
-
 	} else {
-		return 0.0;
+		return 0.0f;
 	}
 }
 
