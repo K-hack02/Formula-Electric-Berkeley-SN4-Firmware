@@ -28,6 +28,8 @@ RMS_MESSAGE_TYPE RMS_MESSAGE;
 extern char buf[128];
 extern uint8_t buf_len;
 
+extern uint16_t bms_pack_voltage;
+
 // ********************************** Functions **********************************
 
 // ***** SET UP ****
@@ -215,7 +217,15 @@ float FEB_CAN_RMS_getMaxTorque(void){
 	if (motor_speed < 15) {
 		return MAX_TORQUE;
 	}
-	float maxTorque = min(MAX_TORQUE, (power_capped) / motor_speed);
+
+	uint16_t minimum_torque = MAX_TORQUE;
+
+	if (bms_pack_voltage < LOW_PACK_VOLTAGE) {
+		minimum_torque = MAX_TORQUE_LOW_V;
+	}
+
+	float maxTorque = min(minimum_torque, (power_capped) / motor_speed);
+
 	return maxTorque;
 }
 

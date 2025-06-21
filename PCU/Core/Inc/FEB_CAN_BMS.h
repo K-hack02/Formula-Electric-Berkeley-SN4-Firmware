@@ -7,6 +7,7 @@
 #include "FEB_CAN_Library_SN4/gen/feb_can.h"
 #include <stdio.h>
 #include "FEB_CAN_Heartbeat.h"
+#include "FEB_Const.h"
 
 
 // ********************************** Functions **********************************

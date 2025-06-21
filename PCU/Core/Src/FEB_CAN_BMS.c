@@ -24,6 +24,8 @@ typedef struct BMS_MESSAGE_TYPE {
 } BMS_MESSAGE_TYPE;
 BMS_MESSAGE_TYPE bms_message;
 
+uint16_t bms_pack_voltage = INIT_VOLTAGE;
+
 // **************************************** Functions ****************************************
 
 uint16_t FEB_CAN_BMS_getTemp(){
@@ -41,9 +43,9 @@ FEB_SM_ST_t FEB_CAN_BMS_getState(){
 // ***** CAN FUNCTIONS ****
 
 uint8_t FEB_CAN_BMS_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank) {
-	uint16_t ids[] = {FEB_CAN_BMS_STATE_FRAME_ID,FEB_CAN_BMS_ACCUMULATOR_TEMPERATURE_FRAME_ID};
+	uint16_t ids[] = {FEB_CAN_BMS_STATE_FRAME_ID,FEB_CAN_BMS_ACCUMULATOR_TEMPERATURE_FRAME_ID,FEB_CAN_BMS_ACCUMULATOR_VOLTAGE_FRAME_ID};
 
-	for (uint8_t i = 0; i < 1; i++) {
+	for (uint8_t i = 0; i < 3; i++) {
 		CAN_FilterTypeDef filter_config;
 
 	    // Standard CAN - 2.0A - 11 bit
@@ -82,6 +84,9 @@ void FEB_CAN_BMS_Store_Msg(CAN_RxHeaderTypeDef* pHeader, uint8_t *RxData) {
         	}
 
             break;
+        case FEB_CAN_BMS_ACCUMULATOR_VOLTAGE_FRAME_ID:
+        	bms_pack_voltage = (RxData[0] << 8) | (RxData[1]);
+        	break;
     }
 }
 
