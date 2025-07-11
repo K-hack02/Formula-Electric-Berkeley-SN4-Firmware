@@ -214,14 +214,15 @@ float FEB_CAN_RMS_getMaxTorque(void){
 	float power_capped = peak_current_limited * 400.0; // Cap power to 24kW (i.e. our min voltage)
  	// If speed is less than 15, we should command max torque
   	// This catches divide by 0 errors and also negative speeds (which may create very high negative torque values)
-	if (motor_speed < 15) {
-		return MAX_TORQUE;
-	}
 
 	uint16_t minimum_torque = MAX_TORQUE;
 
 	if (bms_pack_voltage < LOW_PACK_VOLTAGE) {
 		minimum_torque = MAX_TORQUE_LOW_V;
+	}
+
+	if (motor_speed < 15) {
+		return minimum_torque;
 	}
 
 	float maxTorque = min(minimum_torque, (power_capped) / motor_speed);

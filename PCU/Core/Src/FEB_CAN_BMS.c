@@ -24,7 +24,7 @@ typedef struct BMS_MESSAGE_TYPE {
 } BMS_MESSAGE_TYPE;
 BMS_MESSAGE_TYPE bms_message;
 
-uint16_t bms_pack_voltage = INIT_VOLTAGE;
+uint16_t bms_pack_voltage = 0;
 
 // **************************************** Functions ****************************************
 
