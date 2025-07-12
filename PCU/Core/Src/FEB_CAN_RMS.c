@@ -241,6 +241,13 @@ void FEB_CAN_RMS_Torque(void){
 	FEB_CAN_RMS_Transmit_updateTorque();
 }
 
+void FEB_CAN_ACC(void) {
+	uint16_t acc_pedal_1 = FEB_Read_ADC(ACC_PEDAL_1);
+	uint16_t acc_pedal_2 = FEB_Read_ADC(ACC_PEDAL_2);
+
+	FEB_CAN_RMS_Transmit_updateAcc(acc_pedal_1, acc_pedal_2);
+}
+
 void FEB_CAN_RMS_AUTO_Torque(uint16_t torque){
 
 	RMSControl.torque = torque; // temp
@@ -289,6 +296,28 @@ void FEB_CAN_RMS_Transmit_updateTorque(void) { //TODO: Create Custom Transmit fu
 	FEB_CAN_Tx_Data[5] = RMSControl.enabled;
 	FEB_CAN_Tx_Data[6] = 0;
 	FEB_CAN_Tx_Data[7] = 0;
+
+	// Delay until mailbox available
+	while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0) {}
+
+	// Add Tx data to mailbox
+	if (HAL_CAN_AddTxMessage(&hcan1, &FEB_CAN_Tx_Header, FEB_CAN_Tx_Data, &FEB_CAN_Tx_Mailbox) != HAL_OK) {
+		// Code Error - Shutdown
+	}
+}
+
+void FEB_CAN_RMS_Transmit_updateAcc(uint16_t acc0, uint16_t acc1) {
+	FEB_CAN_Tx_Header.DLC = 4;
+	FEB_CAN_Tx_Header.StdId = FEB_CAN_PCU_RAW_ACC_FRAME_ID; //ID for sending paramater messages for RMS
+	FEB_CAN_Tx_Header.IDE = CAN_ID_STD;
+	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
+	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
+
+	// Copy data to Tx buffer
+	FEB_CAN_Tx_Data[0] = (uint8_t)acc0 & 0xFF;
+	FEB_CAN_Tx_Data[1] = (uint8_t)(acc0 >> 8) & 0xFF;
+	FEB_CAN_Tx_Data[0] = (uint8_t)acc1 & 0xFF;
+	FEB_CAN_Tx_Data[1] = (uint8_t)(acc1 >> 8) & 0xFF;
 
 	// Delay until mailbox available
 	while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0) {}

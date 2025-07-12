@@ -30,6 +30,8 @@ void FEB_CAN_RMS_Store_Msg(CAN_RxHeaderTypeDef* pHeader, uint8_t *RxData);
 void FEB_CAN_RMS_Transmit_paramSafety(void);
 void FEB_CAN_RMS_Transmit_commDisable(void);
 void FEB_CAN_RMS_Transmit_paramBroadcast(void);
+void FEB_CAN_RMS_Transmit_updateAcc(uint16_t acc0, uint16_t acc1);
+void FEB_CAN_ACC(void);
 
 
 
