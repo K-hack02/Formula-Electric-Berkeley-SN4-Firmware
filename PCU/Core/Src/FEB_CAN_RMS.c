@@ -316,8 +316,8 @@ void FEB_CAN_RMS_Transmit_updateAcc(uint16_t acc0, uint16_t acc1) {
 	// Copy data to Tx buffer
 	FEB_CAN_Tx_Data[0] = (uint8_t)acc0 & 0xFF;
 	FEB_CAN_Tx_Data[1] = (uint8_t)(acc0 >> 8) & 0xFF;
-	FEB_CAN_Tx_Data[0] = (uint8_t)acc1 & 0xFF;
-	FEB_CAN_Tx_Data[1] = (uint8_t)(acc1 >> 8) & 0xFF;
+	FEB_CAN_Tx_Data[2] = (uint8_t)acc1 & 0xFF;
+	FEB_CAN_Tx_Data[3] = (uint8_t)(acc1 >> 8) & 0xFF;
 
 	// Delay until mailbox available
 	while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0) {}

@@ -59,58 +59,61 @@ void FEB_Normalized_setAcc0(){
 	normalized_acc = 0.0;
 }
 
-void FEB_Read_Accel_Pedal1() {
-	uint16_t accel_pedal_1_raw = FEB_Read_ADC(ACC_PEDAL_1);
-
-	float accel_pedal_1_position = 0.03256 * accel_pedal_1_raw - 13.4;
-
-
-	if (accel_pedal_1_position > 100.0) {
-		accel_pedal_1_position = 100.0;
-	}
-
-	if (accel_pedal_1_position < 0.0) {
-		accel_pedal_1_position = 0.0;
-	}
-
-	//int accel_pedal_1_position_int1 = accel_pedal_1_position; //Todo
-	//float accel_pedal_1_position_frac = accel_pedal_1_position - accel_pedal_1_position_int1;
-	//int accel_pedal_1_position_int2 = accel_pedal_1_position_frac * 1000;
-
-	char buf[128];
-	sprintf(buf, "[SENSOR] Accelerator 1 Position RAW: %d\n\r", accel_pedal_1_raw);
-	HAL_UART_Transmit(&huart2,(uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
-
-	char buf1[128];
-	sprintf(buf1, "[SENSOR] Accelerator 1 Position: %f\n\r", accel_pedal_1_position);
-	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, strlen(buf1), HAL_MAX_DELAY);
-}
-
-void FEB_Read_Accel_Pedal2() {
-	uint16_t accel_pedal_2_raw = FEB_Read_ADC(ACC_PEDAL_2);
-
-	float accel_pedal_2_position = 0.36437 * accel_pedal_2_raw - 114.8547;
-
-	if (accel_pedal_2_position > 100.0) {
-		accel_pedal_2_position = 100.0;
-	}
-
-	if (accel_pedal_2_position < 0.0) {
-		accel_pedal_2_position = 0.0;
-	}
-
-	int accel_pedal_2_position_int1 = accel_pedal_2_position;
-	float accel_pedal_2_position_frac = accel_pedal_2_position - accel_pedal_2_position_int1;
-	int accel_pedal_2_position_int2 = accel_pedal_2_position_frac * 1000;
-
-	char buf[128];
-	sprintf(buf, "[SENSOR] Accelerator 2 Position RAW: %d\n\r", accel_pedal_2_raw);
-	HAL_UART_Transmit(&huart2,(uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
-
-	char buf1[128];
-	sprintf(buf1, "[SENSOR] Accelerator 2 Position: %d.%d\n\r", accel_pedal_2_position_int1, accel_pedal_2_position_int2);
-	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, strlen(buf1), HAL_MAX_DELAY);
-}
+//// unused (hopefully)
+//void FEB_Read_Accel_Pedal1() {
+//	uint16_t accel_pedal_1_raw = FEB_Read_ADC(ACC_PEDAL_1);
+//
+//	float accel_pedal_1_position = 0.03256 * accel_pedal_1_raw - 13.4;
+//
+//
+//	if (accel_pedal_1_position > 100.0) {
+//		accel_pedal_1_position = 100.0;
+//	}
+//
+//	if (accel_pedal_1_position < 0.0) {
+//		accel_pedal_1_position = 0.0;
+//	}
+//
+//	//int accel_pedal_1_position_int1 = accel_pedal_1_position; //Todo
+//	//float accel_pedal_1_position_frac = accel_pedal_1_position - accel_pedal_1_position_int1;
+//	//int accel_pedal_1_position_int2 = accel_pedal_1_position_frac * 1000;
+//
+//	char buf[128];
+//	sprintf(buf, "[SENSOR] Accelerator 1 Position RAW: %d\n\r", accel_pedal_1_raw);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+//
+//	char buf1[128];
+//	sprintf(buf1, "[SENSOR] Accelerator 1 Position: %f\n\r", accel_pedal_1_position);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, strlen(buf1), HAL_MAX_DELAY);
+//}
+//
+//
+//// unused (hopefully)
+//void FEB_Read_Accel_Pedal2() {
+//	uint16_t accel_pedal_2_raw = FEB_Read_ADC(ACC_PEDAL_2);
+//
+//	float accel_pedal_2_position = 0.36437 * accel_pedal_2_raw - 114.8547;
+//
+//	if (accel_pedal_2_position > 100.0) {
+//		accel_pedal_2_position = 100.0;
+//	}
+//
+//	if (accel_pedal_2_position < 0.0) {
+//		accel_pedal_2_position = 0.0;
+//	}
+//
+//	int accel_pedal_2_position_int1 = accel_pedal_2_position;
+//	float accel_pedal_2_position_frac = accel_pedal_2_position - accel_pedal_2_position_int1;
+//	int accel_pedal_2_position_int2 = accel_pedal_2_position_frac * 1000;
+//
+//	char buf[128];
+//	sprintf(buf, "[SENSOR] Accelerator 2 Position RAW: %d\n\r", accel_pedal_2_raw);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf, strlen(buf), HAL_MAX_DELAY);
+//
+//	char buf1[128];
+//	sprintf(buf1, "[SENSOR] Accelerator 2 Position: %d.%d\n\r", accel_pedal_2_position_int1, accel_pedal_2_position_int2);
+//	HAL_UART_Transmit(&huart2,(uint8_t *)buf1, strlen(buf1), HAL_MAX_DELAY);
+//}
 
 void FEB_Read_Brake_Pedal() {
 	uint16_t brake_pedal_raw = FEB_Read_ADC(BRAKE_IN);
@@ -210,8 +213,8 @@ float FEB_Normalized_Acc_Pedals() {
 	// }
 
 	// Calculate final normalized accelerator value
-	float final_normalized = 0.5f * (ped1_normalized + ped2_normalized);
-	final_normalized = (final_normalized < 0.0f) ? 0.0f : (final_normalized > 1.0f ? 1.0f : final_normalized);
+	float final_normalized = 0.5f * (ped1_normalized + ped2_normalized); // take the average of the two sensor inputs
+	final_normalized = (final_normalized < 0.0f) ? 0.0f : (final_normalized > 1.0f ? 1.0f : final_normalized); //clamp between 0 and 1
 
 	// BSPD digital read protection (active-low)
 	// GPIO_PinState bspd_reading = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);
@@ -220,9 +223,9 @@ float FEB_Normalized_Acc_Pedals() {
 	// }
 
 	// Brake + accelerator conflict → disable accelerator
-	if (normalized_brake > 0.2f && final_normalized > 0.05f) {
-		isImpl = true;
-	}
+	//	if (normalized_brake > 0.2f && final_normalized > 0.05f) {
+	//		isImpl = true;
+	//	}
 
 	// Only recover once both pedals are fully released
 	if (final_normalized < 0.05f && normalized_brake < 0.15f && isImpl) {
