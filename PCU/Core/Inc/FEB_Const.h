@@ -1,12 +1,11 @@
 #ifndef INC_FEB_CONST_H_
 #define INC_FEB_CONST_H_
 
-//***************************************** INCLUDES *****************************8
+// ********************************** Includes **********************************
 
 #include <stdint.h>
 
-
-// **************************************** Definitions ****************************************
+// ********************************** Definitions *******************************
 
 #define SLEEP_TIME 10
 
@@ -47,7 +46,7 @@
 #define TEMP_FILTER_SHARPNESS   1.0     // Make notion page
 #define USER_REGEN_FILTER       0.0     // Manually tune how much of our calculated regen we want
 
-#define HECS_CURRENT 3025.0 //check if current is too high for BSPD
+#define HECS_CURRENT            3025.0  //check if current is too high for BSPD
 
 #define ACC_PEDAL_1 ADC_CHANNEL_1
 #define ACC_PEDAL_2 ADC_CHANNEL_0

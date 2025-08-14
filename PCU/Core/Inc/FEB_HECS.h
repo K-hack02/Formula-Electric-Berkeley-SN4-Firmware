@@ -1,19 +1,13 @@
 #ifndef INC_FEB_HECS_H_
 #define INC_FEB_HECS_H_
 
-// **************************************** Includes ****************************************
+// ********************************** Includes *********************************
 
-#include "stm32f4xx_hal.h"
 #include <stdbool.h>
-#include "FEB_Const.h"
-#include "FEB_Normalized.h"
-#include "main.h"
-#include <stdio.h>
 
-// **************************************** FUNCTIONS ****************************************
+// ********************************** Functions ********************************
 
-void FEB_HECS_update();
-void FEB_HECS_indicate();
-
+void FEB_HECS_update(void);
+bool FEB_HECS_isCurrentHigh(void);
 
 #endif /* INC_FEB_HECS_H_ */

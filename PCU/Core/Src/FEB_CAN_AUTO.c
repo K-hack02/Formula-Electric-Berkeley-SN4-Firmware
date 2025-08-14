@@ -1,13 +1,15 @@
-// ********************************** Includes & External **********************************
+// ********************************** Includes & Externs ************************
+
 #include "FEB_CAN_AUTO.h"
+#include "FEB_CAN_Library_SN4/gen/feb_can.h"
+#include "FEB_CAN_BMS.h"
 
-extern CAN_TxHeaderTypeDef FEB_CAN_Tx_Header;
-extern uint32_t FEB_CAN_Tx_Mailbox;
-extern CAN_HandleTypeDef hcan1; 
-bool auto_on = false;
-uint16_t torque = 0; 
+// ********************************** Variables *********************************
 
-// *********************************** Functions ************************************
+bool auto_on;
+uint16_t torque; 
+
+// ********************************** Functions *********************************
 
 uint8_t FEB_CAN_AUTO_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank) {
 	uint16_t ids[] = {0x1F3};

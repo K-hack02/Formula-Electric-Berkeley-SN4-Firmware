@@ -3,23 +3,7 @@
 
 // ******************************** Includes ********************************
 
-#include <FEB_CAN.h>
-#include <FEB_CAN_AUTO.h>
-#include <stm32f4xx_hal.h>
 #include <stdint.h>
-
-#include "FEB_Timer.h"
-#include "FEB_CAN_RMS.h"
-#include "FEB_CAN_ICS.h"
-#include "FEB_CAN_BSPD.h"
-#include "FEB_CAN_BMS.h"
-#include "FEB_CAN_TPS.h"
-#include "FEB_Normalized.h"
-#include "FEB_HECS.h"
-#include "FEB_CAN_Library_SN4/gen/feb_can.h"
-#include "FEB_CAN_Heartbeat.h"
-#include "TPS2482.h"
-
 
 // ******************************** Functions ********************************
 

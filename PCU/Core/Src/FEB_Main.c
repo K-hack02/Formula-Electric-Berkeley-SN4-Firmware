@@ -1,14 +1,22 @@
 // ********************************** Includes & External **********************************
 
 #include "FEB_Main.h"
+#include "FEB_CAN.h"
+#include "FEB_CAN_BMS.h"
+#include "FEB_CAN_RMS.h"
+#include "FEB_CAN_TPS.h"
+#include "FEB_CAN_DASH.h"
+#include "FEB_CAN_AUTO.h"
+
+#include "TPS2482.h"
 
 extern ADC_HandleTypeDef hadc1;
-extern UART_HandleTypeDef huart2;
 extern I2C_HandleTypeDef hi2c1;
+extern bool auto_on;
+extern bool torque;
 
 // ********************************** Variables **********************************
-char buf[128];
-uint8_t buf_len; //stolen from Main_Setup (SN2)
+
 static TPS2482_Configuration tps2482_configurations[1];
 uint8_t tps2482_i2c_addresses[1];
 static uint16_t tps2482_ids[1];
@@ -23,52 +31,49 @@ static void FEB_Variable_Init(void) {
 }
 
 void FEB_Main_Setup(void){
-	HAL_ADCEx_InjectedStart(&hadc1); //@lovehate - where does this go
-//	FEB_Timer_Init();
-//	FEB_TPS2482_Setup();
-	FEB_CAN_Init(); //FEB_CAN_Init() // The transceiver must be connected otherwise you get sent into an infinite loop
+	HAL_ADCEx_InjectedStart(&hadc1);
+	FEB_CAN_Init();
 	FEB_CAN_RMS_Setup();
 	FEB_CAN_HEARTBEAT_Init();
 	FEB_Variable_Init();
+	
 	bool tps2482_init_res[1];
 	TPS2482_Init(&hi2c1, tps2482_i2c_addresses, tps2482_configurations, tps2482_ids, tps2482_init_res, 1);
+
+	if (!tps2482_init_res[0]) {
+		// TODO Update CAN Hertbeat
+	}
 }
 
 void FEB_Main_While(void){
-//	FEB_CAN_ICS_Transmit();
 	FEB_SM_ST_t bms_state = FEB_CAN_BMS_getState();
+	bool ready_to_drive = FEB_Ready_To_Drive();
 
 	if (!auto_on){
-		if (FEB_Ready_To_Drive() && (bms_state == FEB_SM_ST_DRIVE /*|| bms_state == FEB_SM_ST_DRIVE_REGEN*/)) {
-			FEB_Normalized_updateAcc();
+		if (ready_to_drive && (bms_state == FEB_SM_ST_DRIVE)) {
+			FEB_Update_Normalized_Acc();
 			FEB_CAN_RMS_Process();
-	//		FEB_TPS2482_sendReadings();
 
 		} else {
-			FEB_Normalized_setAcc0();
+			FEB_Set_Normalized_Acc_0();
 			FEB_CAN_RMS_Disable();
 		}
-	//	FEB_Normalized_updateAcc();
-	//	FEB_CAN_RMS_Process();
 
 		FEB_HECS_update();
-
 		FEB_CAN_RMS_Torque();
-
 	} else {
 		if (bms_state == FEB_SM_ST_ENERGIZED) {
 			FEB_CAN_RMS_Process();
 		}else {
-			FEB_Normalized_setAcc0();
+			FEB_Set_Normalized_Acc_0();
 			FEB_CAN_RMS_Disable();
 		}
-		
 		FEB_CAN_RMS_AUTO_Torque(torque);
 	}
 
-	FEB_Normalized_CAN_sendBrake();
+	FEB_CAN_Brake();
 	FEB_CAN_HEARTBEAT_Transmit();
-	FEB_CAN_ACC();
+	FEB_CAN_APPS();
 	FEB_CAN_TPS_Transmit();
 
 	HAL_Delay(10);

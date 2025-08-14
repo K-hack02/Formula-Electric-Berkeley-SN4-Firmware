@@ -1,6 +1,6 @@
-// **************************************** Includes ****************************************
+// ********************************** Includes and Externs **********************
 
-#include "FEB_CAN_ICS.h"
+#include "FEB_CAN_DASH.h"
 #include "FEB_CAN_Library_SN4/gen/feb_can.h"
 
 extern CAN_HandleTypeDef hcan1;
@@ -8,19 +8,16 @@ extern CAN_TxHeaderTypeDef FEB_CAN_Tx_Header;
 extern uint8_t FEB_CAN_Tx_Data[8];
 extern uint32_t FEB_CAN_Tx_Mailbox;
 
-// ******************************** Variables ********************************
-//bool READY_TO_DRIVE = 0;
-static bool previous_button_state = false;
-static bool READY_TO_DRIVE = false;
+// ********************************** Variables *********************************
 
-// **************************************** Functions ****************************************
+static bool ready_to_drive = false;
 
-uint8_t FEB_CAN_ICS_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank) {
-    // For multiple filters, create array of filter IDs and loop over IDs.
+// ********************************** Functions *********************************
 
+uint8_t FEB_CAN_DASH_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank) {
 	uint16_t ids[] = {FEB_CAN_DASH_IO_FRAME_ID};
 
-	for (uint8_t i = 0; i < 1; i++) {
+	for (uint8_t i = 0; i < sizeof(ids) / sizeof(ids[0]); i++) {
 		CAN_FilterTypeDef filter_config;
 
 	    // Standard CAN - 2.0A - 11 bit
@@ -37,25 +34,22 @@ uint8_t FEB_CAN_ICS_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uin
 	    filter_bank++;
 
 		if (HAL_CAN_ConfigFilter(hcan, &filter_config) != HAL_OK) {
-			// Shutdown
+			// Code Error - Shutdown
 		}
 	}
 
 	return filter_bank;
 }
 
-void FEB_CAN_ICS_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
+void FEB_CAN_DASH_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
 	switch(rx_header->StdId) {
 		case FEB_CAN_DASH_IO_FRAME_ID:
 
-			bool current_button_state = ((rx_data[0] | 0b11111101) == 0b11111111);
-
-			READY_TO_DRIVE = current_button_state;
-
+			ready_to_drive = ((rx_data[0] & 0b00000010) != 0);
 			break;
 	}
 }
 
 bool FEB_Ready_To_Drive() {
-	return READY_TO_DRIVE;
+	return ready_to_drive;
 }
