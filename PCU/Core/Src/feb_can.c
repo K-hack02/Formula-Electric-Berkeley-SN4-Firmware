@@ -1,10 +1,11 @@
 // ********************************** Includes & Externs ************************
 
-#include "feb_can.h"
-#include "stm32f4xx_hal.h"
-#include "FEB_CAN_DASH.h"
+#include "FEB_CAN.h"
 #include "FEB_CAN_BMS.h"
 #include "FEB_CAN_RMS.h"
+#include "FEB_CAN_DASH.h"
+
+#include "stm32f4xx_hal.h"
 
 extern CAN_HandleTypeDef hcan1;
 
@@ -17,14 +18,12 @@ uint8_t FEB_CAN_Tx_Data[8];
 uint8_t FEB_CAN_Rx_Data[8];
 
 uint32_t FEB_CAN_Tx_Mailbox;
-uint8_t setup = 0;
 
 // ********************************** Functions *********************************
 
 void FEB_CAN_Init(void) {
 	FEB_CAN_Filter_Config();
 	if (HAL_CAN_Start(&hcan1) != HAL_OK) {
-		setup = 1;
         // Code Error - Shutdown
 	}
 	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
@@ -32,7 +31,7 @@ void FEB_CAN_Init(void) {
 
 void FEB_CAN_Filter_Config(void) {
 	uint8_t filter_bank = 0;
-    filter_bank = FEB_CAN_DASH_Filter(&hcan1, CAN_RX_FIFO0, filter_bank);
+    filter_bank = FEB_CAN_DASH_Filter_Config(&hcan1, CAN_RX_FIFO0, filter_bank);
     filter_bank = FEB_CAN_BMS_Filter_Config(&hcan1, CAN_RX_FIFO0,  filter_bank);
     filter_bank = FEB_CAN_RMS_Filter_Config(&hcan1, CAN_RX_FIFO0, filter_bank);
 }

@@ -12,6 +12,8 @@
         "stdlib.h": "c",
         "feb_apps_brake.h": "c",
         "feb_const.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "feb_can_dash.h": "c",
+        "feb_can_rms.h": "c"
     }
 }

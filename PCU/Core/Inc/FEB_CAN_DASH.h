@@ -7,9 +7,8 @@
 
 // ********************************** Functions *********************************
 
-uint8_t FEB_CAN_DASH_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank);
-
 void FEB_CAN_DASH_Store_Msg(CAN_RxHeaderTypeDef *FEB_CAN_Rx_Header, uint8_t FEB_CAN_Rx_Data[]);
+uint8_t FEB_CAN_DASH_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank);
 
 bool FEB_Ready_To_Drive();
 

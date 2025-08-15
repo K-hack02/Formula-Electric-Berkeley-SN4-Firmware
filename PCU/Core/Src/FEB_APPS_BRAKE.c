@@ -1,16 +1,16 @@
 // ********************************** Includes & Externs ***********************
 
 #include "FEB_APPS_BRAKE.h"
+#include "FEB_CAN.h"
 #include "FEB_Const.h"
 #include "FEB_CAN_Library_SN4/gen/feb_can.h"
-#include "FEB_CAN.h"
 
-#include "stm32f4xx_hal.h"
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include "stm32f4xx_hal.h"
 
 extern ADC_HandleTypeDef  hadc1;
 extern UART_HandleTypeDef huart2;

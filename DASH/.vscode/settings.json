@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "stm32f4xx_hal.h": "c",
+        "feb_io_ics.h": "c"
+    }
+}

@@ -1,13 +1,10 @@
 // ********************************** Includes & External ***********************
 
 #include "FEB_CAN_BSPD.h"
+#include "FEB_CAN.h"
 #include "stm32f4xx_hal.h"
 #include "FEB_CAN_Library_SN4/gen/feb_can.h"
 
-extern CAN_HandleTypeDef hcan1;
-extern uint8_t FEB_CAN_Tx_Data[8];
-extern CAN_TxHeaderTypeDef FEB_CAN_Tx_Header;
-extern uint32_t FEB_CAN_Tx_Mailbox;
 // ********************************** Variables *********************************
 
 static uint8_t bspd_state = 0;

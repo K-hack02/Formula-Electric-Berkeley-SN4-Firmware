@@ -2,13 +2,12 @@
 
 #include "FEB_Main.h"
 #include "FEB_CAN.h"
+#include "TPS2482.h"
 #include "FEB_CAN_BMS.h"
 #include "FEB_CAN_RMS.h"
 #include "FEB_CAN_TPS.h"
 #include "FEB_CAN_DASH.h"
 #include "FEB_CAN_AUTO.h"
-
-#include "TPS2482.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern I2C_HandleTypeDef hi2c1;
@@ -45,7 +44,7 @@ void FEB_Main_Setup(void){
 	}
 }
 
-void FEB_Main_While(void){
+void FEB_Main_Loop(void){
 	FEB_SM_ST_t bms_state = FEB_CAN_BMS_getState();
 	bool ready_to_drive = FEB_Ready_To_Drive();
 

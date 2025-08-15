@@ -14,7 +14,7 @@ static bool ready_to_drive = false;
 
 // ********************************** Functions *********************************
 
-uint8_t FEB_CAN_DASH_Filter(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank) {
+uint8_t FEB_CAN_DASH_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank) {
 	uint16_t ids[] = {FEB_CAN_DASH_IO_FRAME_ID};
 
 	for (uint8_t i = 0; i < sizeof(ids) / sizeof(ids[0]); i++) {

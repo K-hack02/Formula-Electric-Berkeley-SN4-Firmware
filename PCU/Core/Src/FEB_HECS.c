@@ -3,10 +3,11 @@
 #include "FEB_HECS.h"
 #include "FEB_Const.h"
 #include "FEB_APPS_BRAKE.h"
-#include "stm32f4xx_hal.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include "stm32f4xx_hal.h"
 
 // ********************************** Variables ********************************
 

@@ -114,7 +114,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  FEB_Main_While();
+	  FEB_Main_Loop();
   }
   /* USER CODE END 3 */
 }

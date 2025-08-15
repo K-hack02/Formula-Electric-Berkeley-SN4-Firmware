@@ -1,8 +1,8 @@
 // ********************************** Includes & Externs ************************
 
 #include "FEB_CAN_AUTO.h"
-#include "FEB_CAN_Library_SN4/gen/feb_can.h"
 #include "FEB_CAN_BMS.h"
+#include "FEB_CAN_Library_SN4/gen/feb_can.h"
 
 // ********************************** Variables *********************************
 

@@ -1,22 +1,25 @@
-// ********************************** Includes & Externs ************************
+// ********************************** Includes & Externs *************************
+
 
 #include "FEB_CAN_RMS.h"
-#include "FEB_CAN_Library_SN4/gen/feb_can.h"
-#include "FEB_CAN_BMS.h"         
+#include "FEB_CAN.h"   
+#include "FEB_CAN_BMS.h"   
+#include "FEB_Const.h"         
 #include "FEB_APPS_BRAKE.h"
-#include "FEB_Const.h"            
-#include "FEB_CAN.h"             
-#include "stm32f4xx_hal.h" 
+#include "FEB_CAN_Library_SN4/gen/feb_can.h"
+
 #include <math.h>
 #include <string.h>
+#include "stm32f4xx_hal.h" 
 
-// ********************************** Local Definitions ************************************
+// ********************************** Local Definitions **************************
 
 #define MIN(a,b) (( (a) < (b) ) ? (a) : (b))
 #define FEB_CAN_ID_RMS_VOLTAGE 0xa7
 #define FEB_CAN_ID_RMS_MOTOR 0xa5
 
 // ********************************** Structs ************************************
+
 
 struct {
   int16_t torque;
@@ -101,13 +104,13 @@ void FEB_CAN_RMS_Transmit_updateTorque(void) {
 	(void)FEB_CAN_Send_Std(FEB_CAN_RMS_COMMAND_FRAME_ID, data, 8);
 }
 
-void FEB_CAN_RMS_Store_Msg(CAN_RxHeaderTypeDef* pHeader, uint8_t *RxData) {
-	switch (pHeader -> StdId){
+void FEB_CAN_RMS_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
+	switch (rx_header -> StdId){
 		case FEB_CAN_ID_RMS_VOLTAGE:
-			memcpy(&(RMS_MESSAGE.HV_Bus_Voltage), RxData, 2);
+			memcpy(&(RMS_MESSAGE.HV_Bus_Voltage), rx_data, 2);
 			break;
 		case FEB_CAN_ID_RMS_MOTOR:
-			memcpy(&(RMS_MESSAGE.Motor_Speed), RxData+2, 2);
+			memcpy(&(RMS_MESSAGE.Motor_Speed), rx_data+2, 2);
 			break;
 	}
 }

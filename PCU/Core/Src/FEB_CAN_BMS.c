@@ -69,19 +69,19 @@ uint8_t FEB_CAN_BMS_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignme
 	return filter_bank;
 }
 
-void FEB_CAN_BMS_Store_Msg(CAN_RxHeaderTypeDef* pHeader, uint8_t *RxData) {
-    switch (pHeader -> StdId){
+void FEB_CAN_BMS_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
+    switch (rx_header -> StdId){
         case FEB_CAN_BMS_ACCUMULATOR_TEMPERATURE_FRAME_ID :
-        	bms_message.temp = (uint16_t)(RxData[2] << 8) | RxData[3];;
+        	bms_message.temp = (uint16_t)(rx_data[2] << 8) | rx_data[3];;
             break;
 
         case FEB_CAN_BMS_STATE_FRAME_ID:
-        	bms_message.state = (FEB_SM_ST_t)(RxData[0] & 0x1F);
-        	bms_message.ping_ack = (FEB_HB_t)((RxData[0] & 0xE0) >> 5);
+        	bms_message.state = (FEB_SM_ST_t)(rx_data[0] & 0x1F);
+        	bms_message.ping_ack = (FEB_HB_t)((rx_data[0] & 0xE0) >> 5);
             break;
         
 			case FEB_CAN_BMS_ACCUMULATOR_VOLTAGE_FRAME_ID:
-        	bms_pack_voltage = (uint16_t)(RxData[0] << 8) | RxData[1];
+        	bms_pack_voltage = (uint16_t)(rx_data[0] << 8) | rx_data[1];
         	break;
     }
 }

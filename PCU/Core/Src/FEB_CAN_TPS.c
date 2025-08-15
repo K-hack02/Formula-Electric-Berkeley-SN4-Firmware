@@ -1,9 +1,10 @@
 // ********************************** Includes & Externs *************************
 
-#include "FEB_CAN.h"
 #include "FEB_CAN_TPS.h"
+#include "FEB_CAN.h"
 #include "TPS2482.h"
 #include "FEB_CAN_Library_SN4/gen/feb_can.h"
+
 #include <string.h>
 
 extern I2C_HandleTypeDef hi2c1;
