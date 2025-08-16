@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "feb_main.h": "c",
+        "stdio.h": "c",
+        "stdint.h": "c",
+        "feb_adbms6830b.h": "c",
+        "feb_sm.h": "c",
+        "feb_adbms6830b_driver.h": "c",
+        "__locale": "c",
+        "stdbool.h": "c",
+        "stm32f4xx_hal.h": "c",
+        "feb_can_ids.h": "c",
+        "feb_hw.h": "c",
+        "feb_dash_can.h": "c",
+        "feb_can_ivt.h": "c",
+        "feb_can_dash.h": "c",
+        "feb_can.h": "c",
+        "feb_can_heartbeat.h": "c",
+        "feb_can_charger.h": "c",
+        "feb_const.h": "c"
+    }
+}
