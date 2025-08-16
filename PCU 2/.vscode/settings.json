@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "feb_normalized.h": "c",
+        "cstdio": "c",
+        "tps2482.h": "c",
+        "feb_can_bms.h": "c",
+        "stdio.h": "c",
+        "stdbool.h": "c",
+        "locale": "c",
+        "stm32f4xx_hal.h": "c",
+        "feb_can.h": "c",
+        "stdlib.h": "c",
+        "feb_apps_brake.h": "c",
+        "feb_const.h": "c",
+        "math.h": "c",
+        "feb_can_dash.h": "c",
+        "feb_can_rms.h": "c"
+    }
+}
