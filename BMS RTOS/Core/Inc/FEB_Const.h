@@ -20,12 +20,13 @@
 #define FEB_NUM_CAN_DEV 7
 
 #define FEB_CONFIG_CELL_HARD_MAX_VOLTAGE_mV 4200
-#define FEB_CONFIG_CELL_SOFT_MAX_VOLTAGE_mV 4200
 #define FEB_CONFIG_CELL_HARD_MAX_TEMP_dC 	450
-#define FEB_CONFIG_CELL_SOFT_MAX_TEMP_dC 	400
 #define FEB_CONFIG_PACK_HARD_MAX_VOLTAGE_V	FEB_NBANKS * FEB_NUM_ICPBANK * FEB_NUM_CELLS_PER_IC * FEB_CONFIG_CELL_HARD_MAX_VOLTAGE_mV
 
 // ********************************** Charging ***********************************
+
+#define FEB_CONFIG_CELL_SOFT_MAX_VOLTAGE_mV 4150
+#define FEB_CONFIG_CELL_SOFT_MAX_TEMP_dC 	400
 
 #define CHARGE_CURRENT_dA 					50		// x/10 = amps
 
@@ -37,7 +38,11 @@
 #define TRICKLE_PWM_ON_MS               	500
 #define TRICKLE_PWM_OFF_MS              	500
 
-// ********************************** Voltage Reading Configuration **************
+// ********************************** Balancing ***********************************
+
+
+
+// ********************************** Voltage Reading Configuration ***************
 
 #define CONTVR CONTINUOUS
 #define DCPVR DCP_ON
@@ -98,6 +103,11 @@ typedef struct {
 
 typedef struct {
 	float total_voltage_V;
+	float pack_min_voltage_V;
+	float pack_max_voltage_V;
+	float average_pack_temp;
+	float pack_min_temp;
+	float pack_max_temp;
 	bank_t banks[FEB_NBANKS];
 } accumulator_t;
 

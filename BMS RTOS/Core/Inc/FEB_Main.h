@@ -6,8 +6,6 @@
 void FEB_Main_Setup(void);
 void FEB_Task_ADBMS(void);
 void FEB_Task_SM(void);
-void FEB_Task_Charge(void);
-void FEB_Task_Balance(void);
 void FEB_Task_IVT(void);
 void FEB_Task_CAN(void);
 void FEB_Task_UART(void);
