@@ -81,26 +81,20 @@ void FEB_Stop_Balance(void);
 
 // ********************************** Voltage ************************************
 
-void start_adc_cell_voltage_measurements(void);
-void read_cell_voltages(void);
-void store_cell_voltages(void);
-void validate_voltages(void);
 bool FEB_ADBMS_Precharge_Complete(void);
 float FEB_ADBMS_GET_ACC_Total_Voltage(void);
 float FEB_ADBMS_GET_Cell_Voltage(uint8_t bank, uint16_t cell);
 
 // ********************************** Temperature ********************************
 
-void configure_gpio_bits(uint8_t channel);
-void start_aux_voltage_measurements(void);
-void read_aux_voltages(void);
-void store_cell_temps(uint8_t channel);
-void validate_temps(void);
 float FEB_ADBMS_GET_Cell_Temperature(uint8_t bank, uint16_t cell);
 
 // ********************************** Balancing **********************************
 
-void determineMinV(void);
+void FEB_Stop_Balance(void);
+void FEB_Cell_Balance_Start(void);
+void FEB_Cell_Balance_Process(void);
+bool FEB_Cell_Balancing_Status(void);
 
 // ********************************** Error Type *********************************
 

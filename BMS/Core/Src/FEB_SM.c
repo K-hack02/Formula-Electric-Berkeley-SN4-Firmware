@@ -366,6 +366,7 @@ static void FreeTransition(FEB_SM_ST_t next_state){
 		updateStateProtected(next_state);
 		break;
 	case FEB_SM_ST_BALANCE:
+		FEB_Cell_Balance_Start();
 		updateStateProtected(next_state);
 		break;
 	case FEB_SM_ST_DEFAULT:
@@ -375,15 +376,23 @@ static void FreeTransition(FEB_SM_ST_t next_state){
 			LVPowerTransition(FEB_SM_ST_LV);
 		}
 
-		int8_t charging_status = FEB_CAN_Charging_Status();
+		bool charging_status = FEB_CAN_Charging_Status();
 		GPIO_PinState charge_sense = HAL_GPIO_ReadPin(PN_CHARGE_SENSE.group, PN_CHARGE_SENSE.pin);
 
 		// If Shutdown Circuit(air-) is closed, charge sense triggered, accumulator status is within bounds, and charger is on and connected
-		if (FEB_PIN_RD(PN_AIRM_SENSE) == FEB_RELAY_STATE_CLOSE && charge_sense == GPIO_PIN_SET && charging_status == 0 && FEB_CAN_Charger_Received()){
+		if (FEB_PIN_RD(PN_AIRM_SENSE) == FEB_RELAY_STATE_CLOSE && charge_sense == GPIO_PIN_SET && charging_status && FEB_CAN_Charger_Received()){
 				FreeTransition(FEB_SM_ST_CHARGER_PRECHARGE);
-		} else if (charging_status == -1) { 
-			FreeTransition(FEB_SM_ST_FAULT_BMS);
 		}
+		
+		bool balancing_status = FEB_Cell_Balancing_Status();
+		GPIO_PinState balance_sense = false;
+
+		// If Shutdown Circuit(air-) is closed, balance sense triggered, accumulator status is within bounds
+		if (FEB_PIN_RD(PN_AIRM_SENSE) == FEB_RELAY_STATE_CLOSE && balance_sense && balancing_status){
+				FreeTransition(FEB_SM_ST_BALANCE);
+		}
+
+
 	default:
 		return;
 	}
@@ -458,16 +467,14 @@ static void ChargingTransition(FEB_SM_ST_t next_state){
 		break;
 
 	case FEB_SM_ST_DEFAULT:
-		int8_t charge_status = FEB_CAN_Charging_Status();
 
-		//If accumulator status is out of bounds or shutdown circuit(air-) open
-		if (charge_status == 1 || FEB_PIN_RD(PN_AIRM_SENSE)==FEB_RELAY_STATE_OPEN ) {
+		FEB_CAN_Charger_Process();
+		
+		bool charge_status = FEB_CAN_Charging_Status();
+
+		//If accumulator charing status is out of bounds or shutdown circuit(air-) open
+		if (!charge_status || FEB_PIN_RD(PN_AIRM_SENSE)==FEB_RELAY_STATE_OPEN ) {
 			ChargingTransition(FEB_SM_ST_FREE);
-		}
-
-		//If accumulator status is out of bounds
-		if (charge_status == -1) {
-			ChargingTransition(FEB_SM_ST_FAULT_CHARGING);
 		}
 
 	default:
@@ -488,7 +495,7 @@ static void BalanceTransition(FEB_SM_ST_t next_state){
 
 	case FEB_SM_ST_LV:
 	case FEB_SM_ST_FREE:
-		// Open air+ and precharge relays - stop balancing
+		// Open air+ and precharge relays for redundancy
 		FEB_PIN_RST(PN_PC_AIR);
 		FEB_PIN_RST(PN_PC_REL);
 		FEB_Stop_Balance();
@@ -496,9 +503,14 @@ static void BalanceTransition(FEB_SM_ST_t next_state){
 		break;
 
 	case FEB_SM_ST_DEFAULT:
-		//If air- is open
-		if (FEB_PIN_RD(PN_AIRM_SENSE) == FEB_RELAY_STATE_OPEN) {
-			BalanceTransition(FEB_SM_ST_FREE);
+
+		FEB_Cell_Balance_Process();
+
+		bool balance_status = FEB_Cell_Balancing_Status();
+
+		//If accumulator charing status is out of bounds or shutdown circuit(air-) open
+		if (!balance_status || FEB_PIN_RD(PN_AIRM_SENSE)==FEB_RELAY_STATE_OPEN ) {
+			ChargingTransition(FEB_SM_ST_FREE);
 		}
 
 		break;

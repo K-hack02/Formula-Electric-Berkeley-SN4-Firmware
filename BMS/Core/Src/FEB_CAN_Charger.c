@@ -57,6 +57,7 @@ static void charger_CAN_transmit(void);
 void FEB_CAN_Charger_Init(void) {
 	BMS_Charger_Message.max_voltage_dV = (uint16_t)(FEB_NBANKS * FEB_NUM_CELL_PER_BANK * (uint16_t)(FEB_Config_Get_Cell_Max_Voltage_mV() * 1e-2));
 	BMS_Charger_Message.max_current_dA = CHARGE_CURRENT_dA;
+	BMS_Charger_Message.control = 1;
 	BMS_Charger_Message.done_charging = false;
 
 	CCS_message.received = false;
@@ -197,37 +198,30 @@ bool FEB_CAN_Charger_Received(void){
 	return CCS_message.received;
 }
 
-int8_t FEB_CAN_Charging_Status(void) {
-	if (BMS_Charger_Message.done_charging == true) {
-		return 1;
-	}
+bool FEB_CAN_Charging_Status(void) {
+    if (BMS_Charger_Message.done_charging) {
+        return false;
+    }
 
-	if (FEB_ADBMS_GET_ACC_Total_Voltage() >= FEB_CONFIG_PACK_HARD_MAX_VOLTAGE_V ) {
-		return -1;
-	}
+    if (FEB_ADBMS_GET_ACC_Total_Voltage() >= TRICKLE_CHARGE_MAX_VOLTAGE_dV ) {
+        return false;
+    }
 
-	for ( size_t i = 0; i < FEB_NBANKS; ++i) {
-		for ( size_t j = 0; j < FEB_NUM_CELL_PER_BANK; ++j) {
-			
-			float cell_voltage = FEB_ADBMS_GET_Cell_Voltage(i, j);
-			if (cell_voltage * 1000 >= FEB_CONFIG_CELL_SOFT_MAX_VOLTAGE_mV ) {
-				if (cell_voltage * 1000 >= FEB_CONFIG_CELL_HARD_MAX_VOLTAGE_mV ) {
-					return -1;
-				}
-				return 1;
-			}
-			
-			float cell_temp = FEB_ADBMS_GET_Cell_Temperature(i, j);
-			if (cell_temp * 10  >= FEB_CONFIG_CELL_SOFT_MAX_TEMP_dC ) {
-				if (cell_temp * 10 >= FEB_CONFIG_CELL_HARD_MAX_TEMP_dC ) {
-					return -1;
-				}
-				return 1;
-			}
-		}
-	}
+    for (size_t i = 0; i < FEB_NBANKS; ++i) {
+        for (size_t j = 0; j < FEB_NUM_CELL_PER_BANK; ++j) {
+            const float v = FEB_ADBMS_GET_Cell_Voltage(i, j) * 1000.0f;
+            const float t = FEB_ADBMS_GET_Cell_Temperature(i, j) * 10.0f;
 
-	return 0;
+            if (v >= FEB_CONFIG_CELL_SOFT_MAX_VOLTAGE_mV) {
+                return false;
+            }
+            if (t >= FEB_CONFIG_CELL_SOFT_MAX_TEMP_dC) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 void FEB_CAN_Charger_Serial(void) {

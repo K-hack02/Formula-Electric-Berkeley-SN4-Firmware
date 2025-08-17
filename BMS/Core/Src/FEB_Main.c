@@ -19,13 +19,10 @@ static int cyc2=0;
 // ********************************** Functions **********************************
 
 void FEB_Main_Setup() {
-	
+
 	FEB_ADBMS_Init();
 	FEB_CAN_Init();
-	FEB_CAN_Heartbeat_Init();
-	// Uncomment to Balance
-	// FEB_Cell_Balance_Start();
-	
+	FEB_CAN_Heartbeat_Init();	
 	FEB_CAN_Charger_Init();
 	FEB_SM_Init();
 	HAL_Delay(5);
@@ -39,10 +36,6 @@ void FEB_Task_ADBMS() {
 
 void FEB_Task_SM() {
 	FEB_SM_Process();
-}
-
-void FEB_Task_Charge() {
-	FEB_CAN_Charger_Process();
 }
 
 void FEB_Task_Balance() {
