@@ -103,6 +103,11 @@ typedef struct {
 
 typedef struct {
 	float total_voltage_V;
+	float pack_min_voltage_V;
+	float pack_max_voltage_V;
+	float average_pack_temp;
+	float pack_min_temp;
+	float pack_max_temp;
 	bank_t banks[FEB_NBANKS];
 } accumulator_t;
 

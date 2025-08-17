@@ -112,16 +112,8 @@ void FEB_CELL_CAN_Transmit(void)
 
 void FEB_ACC_VOLT_CAN_Transmit(void) {
     float pack_volt_V     = FEB_ADBMS_GET_ACC_Total_Voltage();
-    float min_cell_volt_V = FEB_ADBMS_GET_Cell_Voltage(0, 0);
+    float min_cell_volt_V = FEB_ADBMS_GET_ACC_MIN_Voltage();
     float max_cell_volt_V = FEB_ADBMS_GET_Cell_Voltage(0, 0);
-
-    for (size_t i = 0; i < FEB_NBANKS; ++i) {
-        for (size_t j = 0; j < FEB_NUM_CELL_PER_BANK; ++j) {
-            float v = FEB_ADBMS_GET_Cell_Voltage(i, j);
-            min_cell_volt_V = fminf(min_cell_volt_V, v);
-            max_cell_volt_V = fmaxf(max_cell_volt_V, v);
-        }
-    }
 
     // Pack: pack voltage in dV (x100), cell min/max in mV (x1000)
     uint16_t pack_dV = (uint16_t)(pack_volt_V * 100.0f);
@@ -140,23 +132,9 @@ void FEB_ACC_VOLT_CAN_Transmit(void) {
 }
 
 void FEB_ACC_TEMP_CAN_Transmit(void) {
-    double pack_temp_C     = 0.0;
-    float  min_cell_temp_C = fmaxf(FEB_ADBMS_GET_Cell_Temperature(0, 0), 0.0f);
-    float  max_cell_temp_C = FEB_ADBMS_GET_Cell_Temperature(0, 0);
-
-    for (size_t i = 0; i < FEB_NBANKS; ++i) {
-        for (size_t j = 0; j < FEB_NUM_CELL_PER_BANK; ++j) {
-            float temp = FEB_ADBMS_GET_Cell_Temperature(i, j);
-			
-			if (temp < 0.0f) { 
-				continue;
-			}
-
-            min_cell_temp_C = fminf(min_cell_temp_C, temp);
-            max_cell_temp_C = fmaxf(max_cell_temp_C, temp);
-            pack_temp_C += (double)temp / (double)(FEB_NBANKS * FEB_NUM_CELL_PER_BANK);
-        }
-    }
+    double pack_temp_C     = FEB_ADBMS_GET_ACC_AVG_Temp();
+    float  min_cell_temp_C = FEB_ADBMS_GET_ACC_MIN_Temp();
+    float  max_cell_temp_C = FEB_ADBMS_GET_ACC_MAX_Temp();
 
     int16_t pack_cC = (int16_t)(pack_temp_C * 100.0);
     int16_t min_cC  = (int16_t)(min_cell_temp_C * 100.0f);

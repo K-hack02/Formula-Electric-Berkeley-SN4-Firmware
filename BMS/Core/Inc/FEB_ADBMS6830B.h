@@ -81,12 +81,17 @@ void FEB_Stop_Balance(void);
 
 // ********************************** Voltage ************************************
 
-bool FEB_ADBMS_Precharge_Complete(void);
+float FEB_ADBMS_GET_ACC_MIN_Voltage(void);
+float FEB_ADBMS_GET_ACC_MAX_Voltage(void);
+bool  FEB_ADBMS_Precharge_Complete(void);
 float FEB_ADBMS_GET_ACC_Total_Voltage(void);
 float FEB_ADBMS_GET_Cell_Voltage(uint8_t bank, uint16_t cell);
 
 // ********************************** Temperature ********************************
 
+float FEB_ADBMS_GET_ACC_AVG_Temp(void);
+float FEB_ADBMS_GET_ACC_MIN_Temp(void);
+float FEB_ADBMS_GET_ACC_MAX_Temp(void);
 float FEB_ADBMS_GET_Cell_Temperature(uint8_t bank, uint16_t cell);
 
 // ********************************** Balancing **********************************

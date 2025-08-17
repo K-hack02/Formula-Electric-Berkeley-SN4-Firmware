@@ -34,6 +34,7 @@ static uint16_t uv = 0x0010;
 static uint16_t ov = 0x3FF0;
 
 static float MIN_CELL_VOLTAGE=3.1;
+
 static float FEB_MIN_SLIPPAGE_V=0.03;
 
 // ********************************** Helper Functions ***************************
@@ -59,24 +60,34 @@ static void read_cell_voltages() {
 
 static void store_cell_voltages() {
 	FEB_ACC.total_voltage_V = 0;
+	
+	float min_cell_V = FLT_MAX;
+    float max_cell_V = -FLT_MAX;
+
 	for (uint8_t bank = 0; bank < FEB_NBANKS; bank ++) {
 		for(uint8_t ic =0; ic<FEB_NUM_ICPBANK;ic++){
 			for (uint8_t cell = 0; cell < FEB_NUM_CELLS_PER_IC; cell ++) {
 				float CVoltage = convert_voltage(IC_Config[ic+bank*FEB_NUM_ICPBANK].cells.c_codes[cell]);
+				float SVoltage = convert_voltage(IC_Config[ic+bank*FEB_NUM_ICPBANK].cells.s_codes[cell]);
+
 				FEB_ACC.banks[bank].cells[cell+ic*FEB_NUM_CELLS_PER_IC].voltage_V = CVoltage;
-				FEB_ACC.banks[bank].cells[cell+ic*FEB_NUM_CELLS_PER_IC].voltage_S = convert_voltage(IC_Config[ic+bank*FEB_NUM_ICPBANK].cells.s_codes[cell]);
+				FEB_ACC.banks[bank].cells[cell+ic*FEB_NUM_CELLS_PER_IC].voltage_S = SVoltage;
 				FEB_ACC.total_voltage_V+=CVoltage;
+
+				if (CVoltage >= 0.0f) {
+                    if (CVoltage < min_cell_V) min_cell_V = CVoltage;
+                    if (CVoltage > max_cell_V) max_cell_V = CVoltage;
+                }
 			}
 		}
 	}
+	FEB_ACC.pack_min_voltage_V = min_cell_V;
+	FEB_ACC.pack_max_voltage_V = max_cell_V;
 }
 
 static void validate_voltages() {
 	uint16_t vMax = FEB_Config_Get_Cell_Max_Voltage_mV();
 	uint16_t vMin = FEB_Config_Get_Cell_Min_Voltage_mV();
-
-	float min_cell_V = FLT_MAX;
-    bool  min_found  = false;
 
 	for (uint8_t bank = 0; bank < FEB_NBANKS; bank ++) {
 		FEB_ACC.banks[bank].badReadV=0;
@@ -100,20 +111,8 @@ static void validate_voltages() {
 			} else {
 				FEB_ACC.banks[bank].cells[cell].violations=0;
 			}
-
-			if (voltageC >= 0) {
-                float v_V = voltageC * 0.001f; 
-                if (!min_found || v_V < min_cell_V) {
-                    min_cell_V = v_V;
-                    min_found  = true;
-                }
-			}
 		}
 	}
-
-	if (min_found) {
-        MIN_CELL_VOLTAGE = min_cell_V;
-    }
 }
 
 // ********************************** Temperature ********************************
@@ -145,16 +144,40 @@ static void read_aux_voltages() {
 }
 
 static void store_cell_temps(uint8_t channel) {
+    float total_temp_C = 0.0f;
+    uint16_t temp_count = 0;
+
+	float min_temp_C = FLT_MAX;
+    float max_temp_C = -FLT_MAX;
+
 	for (uint8_t bank = 0; bank < FEB_NBANKS; bank++) {
 		for (uint8_t icn = 0; icn < FEB_NUM_ICPBANK; icn++) {
 			uint16_t mux1 = IC_Config[FEB_NUM_ICPBANK*bank+icn].aux.a_codes[0];
 			uint16_t mux2 = IC_Config[FEB_NUM_ICPBANK*bank+icn].aux.a_codes[1];
 			float V1=(convert_voltage(mux1)*1000);
 			float V2=(convert_voltage(mux2)*1000);
-			FEB_ACC.banks[bank].temp_sensor_readings_V[icn*FEB_NUM_TEMP_SENSE_PER_IC+channel] = FEB_Cell_Temp_LUT_Get_Temp_100mC( (int) V1)*0.1;
-			FEB_ACC.banks[bank].temp_sensor_readings_V[icn*FEB_NUM_TEMP_SENSE_PER_IC+channel+5] = FEB_Cell_Temp_LUT_Get_Temp_100mC( (int) V2)*0.1;
+			
+			float T1 = FEB_Cell_Temp_LUT_Get_Temp_100mC((int)V1) * 0.1f;
+            float T2 = FEB_Cell_Temp_LUT_Get_Temp_100mC((int)V2) * 0.1f;
+
+			FEB_ACC.banks[bank].temp_sensor_readings_V[icn*FEB_NUM_TEMP_SENSE_PER_IC+channel] = T1;
+			FEB_ACC.banks[bank].temp_sensor_readings_V[icn*FEB_NUM_TEMP_SENSE_PER_IC+channel+5] = T2;
+
+			if (T1 >= 0) {
+                if (T1 < min_temp_C) min_temp_C = T1;
+                if (T1 > max_temp_C) max_temp_C = T1;
+                total_temp_C += T1;
+                temp_count++;
+            }
+
 		}
 	}
+
+	if (temp_count > 0) {
+        FEB_ACC.pack_min_temp = min_temp_C;
+        FEB_ACC.pack_max_temp = max_temp_C;
+        FEB_ACC.average_pack_temp = total_temp_C / (double)temp_count;
+    }
 }
 
 static void validate_temps() {
@@ -192,11 +215,9 @@ static void validate_temps() {
 // ********************************** Balancing **********************************
 
 static void determineMinV(){
-	FEB_Stop_Balance();
 	transmitCMD(ADCV|AD_CONT|AD_RD);
 	HAL_Delay(1);
-	ADBMS6830B_rdcv(FEB_NUM_IC, IC_Config);
-	ADBMS6830B_rdsv(FEB_NUM_IC, IC_Config);
+	read_cell_voltages();
 	store_cell_voltages();
 	validate_voltages();
 }
@@ -249,6 +270,14 @@ float FEB_ADBMS_GET_ACC_Total_Voltage() {
 	return FEB_ACC.total_voltage_V;
 }
 
+float FEB_ADBMS_GET_ACC_MIN_Voltage() {
+	return FEB_ACC.pack_min_voltage_V;
+}
+
+float FEB_ADBMS_GET_ACC_MAX_Voltage() {
+	return FEB_ACC.pack_max_voltage_V;
+}
+
 float FEB_ADBMS_GET_Cell_Voltage(uint8_t bank, uint16_t cell) {
     if (bank >= FEB_NBANKS || cell >= FEB_NUM_CELL_PER_BANK) {
 		return -1.0f; 
@@ -263,6 +292,18 @@ bool FEB_ADBMS_Precharge_Complete(void) {
 }
 
 // ********************************** Temperature ********************************
+
+float FEB_ADBMS_GET_ACC_AVG_Temp() {
+	return FEB_ACC.average_pack_temp;
+}
+
+float FEB_ADBMS_GET_ACC_MIN_Temp() {
+	return FEB_ACC.pack_min_temp;
+}
+
+float FEB_ADBMS_GET_ACC_MAX_Temp() {
+	return FEB_ACC.pack_max_temp;
+}
 
 float FEB_ADBMS_GET_Cell_Temperature(uint8_t bank, uint16_t cell) {
     if (bank >= FEB_NBANKS || cell >= FEB_NUM_CELL_PER_BANK) {
@@ -287,7 +328,9 @@ void FEB_Cell_Balance_Process(){
 		return;
 	}
 
+	FEB_Stop_Balance();
 	determineMinV();
+
 	if(balancing_cycle == 3 ){
 		balancing_mask=~balancing_mask;
 		balancing_cycle=0;
