@@ -3,54 +3,79 @@
 #include "FEB_CAN_Heartbeat.h"
 #include "FEB_Const.h"
 
-#include <stdatomic.h>
+#include "cmsis_os.h"
 
 // ********************************** Structs ************************************
 
 typedef struct {
-	atomic_uint          	seq;
-    atomic_uint_least32_t 	last_received;
-	atomic_uint_least8_t  	FAck;			// Failed Acknowledgments (external code may increment)
-    atomic_uint_least8_t  	LaOn;			// Count of CAN SM reports since last struct update
-    atomic_uint_least8_t  	initialized;	// >0 means we've seen a valid heartbeat
+	volatile uint32_t     	seq;
+    volatile uint32_t  		last_received;
+	volatile uint8_t  		FAck;			// Failed Acknowledgments (external code may increment)
+    volatile uint8_t  		LaOn;			// Count of CAN SM reports since last struct update
+    volatile uint8_t  		initialized;	// >0 means we've seen a valid heartbeat
 } FEB_CAN_DEV;
 
 // ********************************** Variables **********************************
 
 static FEB_CAN_DEV FEB_CAN_NETWORK[DEV_IND_ALL]={0};
 
-
 // ********************************** Static Functions ***************************
 
-static inline void hb_write_begin(FEB_CAN_DEV *d){
-    atomic_fetch_add_explicit(&d->seq, 1u, memory_order_relaxed);  // -> odd
+static inline UBaseType_t hb_write_begin_from_isr(FEB_CAN_DEV *d){
+	UBaseType_t ux_status = taskENTER_CRITICAL_FROM_ISR();
+    d->seq++;
+    return ux_status;
 }
-static inline void hb_write_end(FEB_CAN_DEV *d){
-    atomic_fetch_add_explicit(&d->seq, 1u, memory_order_release);  // -> even
+static inline void hb_write_end_from_isr(UBaseType_t ux_status, FEB_CAN_DEV *d){
+	d->seq++;
+    taskEXIT_CRITICAL_FROM_ISR(ux_status);
 }
 
 static inline void hb_read_consistent(FEB_CAN_DEV *d, uint32_t *last_received, uint8_t *FAck, uint8_t *LaOn, uint8_t *initialized) {
     unsigned s0, s1;
     do {
-        s0 = atomic_load_explicit(&d->seq, memory_order_acquire);
+        s0 = d->seq;
         if (s0 & 1u) continue;
-        *last_received    = atomic_load_explicit(&d->last_received,     memory_order_relaxed);
-        *FAck       = atomic_load_explicit(&d->FAck,        memory_order_relaxed);
-        *LaOn       = atomic_load_explicit(&d->LaOn,        memory_order_relaxed);
-        *initialized= atomic_load_explicit(&d->initialized, memory_order_relaxed);
-        s1 = atomic_load_explicit(&d->seq, memory_order_acquire);
+        *last_received = d->last_received;
+        *FAck          = d->FAck;
+        *LaOn          = d->LaOn;
+        *initialized   = d->initialized;
+        s1 = d->seq;
     } while (s0 != s1 || (s1 & 1u));
+}
+
+static inline uint8_t hb_read_u8_consistent(FEB_CAN_DEV *d, volatile uint8_t *field) {
+    uint32_t s0, s1;
+    uint8_t  v;
+    do {
+        s0 = d->seq;
+        if (s0 & 1u) continue;
+        v  = *field;
+        s1 = d->seq;
+    } while (s0 != s1 || (s1 & 1u));
+    return v;
+}
+
+static inline uint32_t hb_read_u32_consistent(FEB_CAN_DEV *d, volatile uint32_t *field) {
+    uint32_t s0, s1, v;
+    do {
+        s0 = d->seq;
+        if (s0 & 1u) continue;
+        v  = *field;
+        s1 = d->seq;
+    } while (s0 != s1 || (s1 & 1u));
+    return v;
 }
 
 // ********************************** Functions **********************************
 
 void FEB_CAN_Heartbeat_Init(void) {
     for (uint8_t i = 0; i < (uint8_t)DEV_IND_ALL; ++i) {
-		atomic_store_explicit(&FEB_CAN_NETWORK[i].seq, 0u, memory_order_relaxed);
-        atomic_store_explicit(&FEB_CAN_NETWORK[i].last_received, 0u, memory_order_relaxed);
-        atomic_store_explicit(&FEB_CAN_NETWORK[i].FAck, (uint8_t)FEB_FACK_THRESHOLD, memory_order_relaxed);
-        atomic_store_explicit(&FEB_CAN_NETWORK[i].LaOn, 0u, memory_order_relaxed);
-        atomic_store_explicit(&FEB_CAN_NETWORK[i].initialized, (uint8_t)INITIALIZED_THRESHOLD, memory_order_relaxed);
+		FEB_CAN_NETWORK[i].seq          = 0u;
+        FEB_CAN_NETWORK[i].last_received= 0u;
+        FEB_CAN_NETWORK[i].FAck         = (uint8_t)FEB_FACK_THRESHOLD;
+        FEB_CAN_NETWORK[i].LaOn         = 0u;
+        FEB_CAN_NETWORK[i].initialized  = (uint8_t)INITIALIZED_THRESHOLD;
     }
 }
 
@@ -112,13 +137,12 @@ void FEB_CAN_Heartbeat_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data
 	}
 
 	FEB_CAN_DEV *d = &FEB_CAN_NETWORK[device];
-    hb_write_begin(d);
-    atomic_store_explicit(&d->last_received, HAL_GetTick(), memory_order_relaxed);
-    atomic_store_explicit(&d->FAck, 0u, memory_order_relaxed);
-    atomic_store_explicit(&d->LaOn, 0u, memory_order_relaxed);
-    atomic_store_explicit(&d->initialized, 0u, memory_order_relaxed);
-    hb_write_end(d);
-
+    UBaseType_t ux_status = hb_write_begin_from_isr(d);
+	d->last_received = HAL_GetTick();
+    d->FAck          = 0;
+    d->LaOn          = 0;
+    d->initialized   = 0;
+	hb_write_end_from_isr(ux_status, d);
 }
 
 FEB_DEV_STATUS FEB_GetStatus(FEB_DEV_INDEX idx) {
@@ -154,28 +178,37 @@ FEB_DEV_STATUS FEB_COMBINED_STATUS() {
 }
 
 uint8_t FEB_CAN_Heartbeat_Get_Initialized(FEB_DEV_INDEX device_index) {
-	return atomic_load_explicit(&FEB_CAN_NETWORK[device_index].initialized, memory_order_acquire);
-}
-
-void FEB_CAN_Heartbeat_Decrement_Initialized(FEB_DEV_INDEX device_index) {
-	uint8_t curr = atomic_load_explicit(&FEB_CAN_NETWORK[device_index].initialized, memory_order_relaxed);
-    if (curr > 0) {
-        (void)atomic_fetch_sub_explicit(&FEB_CAN_NETWORK[device_index].initialized, 1u, memory_order_relaxed);
-    }
+	FEB_CAN_DEV *d = &FEB_CAN_NETWORK[device_index];
+	return (uint8_t)hb_read_u8_consistent(d, &d->initialized);
 }
 
 uint32_t FEB_CAN_Heartbeat_Get_Last_Received(FEB_DEV_INDEX device_index) {
-    return atomic_load_explicit(&FEB_CAN_NETWORK[device_index].last_received, memory_order_acquire);
+	FEB_CAN_DEV *d = &FEB_CAN_NETWORK[device_index];
+	return (uint32_t)hb_read_u32_consistent(d, &d->last_received);
+}
+
+void FEB_CAN_Heartbeat_Decrement_Initialized(FEB_DEV_INDEX device_index) {
+	taskENTER_CRITICAL();
+    if (FEB_CAN_NETWORK[device_index].initialized > 0) {
+        FEB_CAN_NETWORK[device_index].initialized--;
+    }
+    taskEXIT_CRITICAL();
 }
 
 void FEB_CAN_Heartbeat_Reset_Last_Received(FEB_DEV_INDEX device_index) {
-	atomic_store_explicit(&FEB_CAN_NETWORK[device_index].last_received, 0u, memory_order_relaxed);
+	taskENTER_CRITICAL();
+    FEB_CAN_NETWORK[device_index].last_received = 0;
+    taskEXIT_CRITICAL();
 }
 
 void FEB_CAN_Heartbeat_Increment_LaOn(FEB_DEV_INDEX device_index) {
-	(void)atomic_fetch_add_explicit(&FEB_CAN_NETWORK[device_index].LaOn, 1u, memory_order_relaxed);
+	taskENTER_CRITICAL();
+    FEB_CAN_NETWORK[device_index].LaOn++;
+    taskEXIT_CRITICAL();
 }
 
 void FEB_CAN_Heartbeat_Increment_FAck(FEB_DEV_INDEX device_index) {
-	(void)atomic_fetch_add_explicit(&FEB_CAN_NETWORK[device_index].FAck, 1u, memory_order_relaxed);
+	taskENTER_CRITICAL();
+    FEB_CAN_NETWORK[device_index].FAck++;
+    taskEXIT_CRITICAL();
 }

@@ -2,8 +2,9 @@
 
 #include "FEB_Main.h"
 #include "FEB_HW.h"
-#include "FEB_CAN.h"
 #include "FEB_SM.h"
+#include "FEB_CAN.h"
+#include "FEB_CAN_IVT.h"
 #include "FEB_ADBMS6830B.h"
 #include "FEB_CAN_Charger.h"
 #include "FEB_CAN_Heartbeat.h"
@@ -24,9 +25,14 @@ void FEB_Task_SM() {
 	FEB_SM_Process();
 }
 
-void FEB_Task_ADBMS() {
+void FEB_Task_ADBMS_Voltage() {
 	accumulator_t* FEB_ACC = ACC_BeginWrite();
 	FEB_ADBMS_Voltage_Process(FEB_ACC);
+	ACC_Publish();
+}
+
+void FEB_Task_ADBMS_Temperature() {
+	accumulator_t* FEB_ACC = ACC_BeginWrite();
 	FEB_ADBMS_Temperature_Process(FEB_ACC);
 	ACC_Publish();
 }

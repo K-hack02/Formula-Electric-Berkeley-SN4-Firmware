@@ -11,7 +11,6 @@
 
 #include <float.h>
 #include <stdbool.h>
-#include <stdatomic.h>
 #include "cmsis_os2.h"
 #include "stm32f4xx_hal.h"
 
@@ -22,7 +21,7 @@ extern osThreadId_t State_MachineHandle;
 cell_asic IC_Config[FEB_NUM_IC];
 
 static accumulator_t s_acc_buf[2];
-static _Atomic(accumulator_t*) s_acc_read  = &s_acc_buf[0];
+static volatile accumulator_t* s_acc_read  = &s_acc_buf[0];
 static accumulator_t*         s_acc_write = &s_acc_buf[1];
 
 int balancing_cycle=0;
@@ -52,7 +51,7 @@ static inline float convert_voltage(int16_t raw_code) {
 // ********************************** Static Functions ***************************
 
 static const accumulator_t* ACC_Read(void) {
-    return atomic_load_explicit(&s_acc_read, memory_order_acquire);
+    return (const accumulator_t*)s_acc_read;
 }
 
 // ********************************** Voltage ************************************
@@ -263,7 +262,7 @@ void FEB_ADBMS_Init() {
 		}
 	}
 
-	atomic_store_explicit(&s_acc_read, &s_acc_buf[0], memory_order_release);
+	s_acc_read  = &s_acc_buf[0];
     s_acc_write = &s_acc_buf[1];
 
 	FEB_cs_high();
@@ -280,8 +279,12 @@ accumulator_t* ACC_BeginWrite(void) {
 }
 
 void ACC_Publish(void) {
-    accumulator_t* old = atomic_exchange_explicit(&s_acc_read, s_acc_write, memory_order_release);
+	vTaskSuspendAll();
+    accumulator_t* old = (accumulator_t*)s_acc_read;
+    s_acc_read = s_acc_write; 
     s_acc_write = old;
+    xTaskResumeAll();
+
 }
 
 void FEB_ADBMS_Voltage_Process(accumulator_t* FEB_ACC) {

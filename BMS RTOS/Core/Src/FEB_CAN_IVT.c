@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdatomic.h>
 
 extern UART_HandleTypeDef huart2;
 
@@ -29,7 +28,7 @@ extern UART_HandleTypeDef huart2;
 // ********************************** Structs ************************************
 
 typedef struct {
-    atomic_uint seq;
+    volatile uint32_t seq;
     float current_mA;
     float voltage_1_mV;
     float voltage_2_mV;
@@ -37,34 +36,38 @@ typedef struct {
 } FEB_CAN_IVT_Message_t;
 
 typedef struct {
-    atomic_bool current;
-    atomic_bool voltage_1;
-    atomic_bool voltage_2;
-    atomic_bool voltage_3;
+    volatile bool current;
+    volatile bool voltage_1;
+    volatile bool voltage_2;
+    volatile bool voltage_3;
 } IVT_CAN_flag_t;
 
 // ********************************** Variables **********************************
 
-static IVT_CAN_flag_t IVT_CAN_flag;
-FEB_CAN_IVT_Message_t FEB_CAN_IVT_Message = {ATOMIC_VAR_INIT(false), ATOMIC_VAR_INIT(false), ATOMIC_VAR_INIT(false), ATOMIC_VAR_INIT(false)};
+static IVT_CAN_flag_t IVT_CAN_flag = {0};
+FEB_CAN_IVT_Message_t FEB_CAN_IVT_Message = {0};
 
 // ********************************** Static Functions ***************************
 
-static inline void ivt_write_begin(void) {
-    atomic_fetch_add_explicit(&FEB_CAN_IVT_Message.seq, 1u, memory_order_relaxed);  // -> odd
+static inline UBaseType_t ivt_write_begin_from_isr(void) {
+    UBaseType_t ux_status = taskENTER_CRITICAL_FROM_ISR();
+    FEB_CAN_IVT_Message.seq++;
+    return ux_status;
 }
-static inline void ivt_write_end(void) {
-    atomic_fetch_add_explicit(&FEB_CAN_IVT_Message.seq, 1u, memory_order_release);  // -> even
+
+static inline void ivt_write_end_from_isr(UBaseType_t ux_status) {
+    FEB_CAN_IVT_Message.seq++;
+    taskEXIT_CRITICAL_FROM_ISR(ux_status);
 }
 
 static inline float ivt_read_field_consistent(float const *field) {
     unsigned s0, s1;
     float v;
     do {
-        s0 = atomic_load_explicit(&FEB_CAN_IVT_Message.seq, memory_order_acquire);
+        s0 = FEB_CAN_IVT_Message.seq;
         if (s0 & 1u) continue;
         v  = *field;
-        s1 = atomic_load_explicit(&FEB_CAN_IVT_Message.seq, memory_order_acquire);
+        s1 = FEB_CAN_IVT_Message.seq;
     } while (s0 != s1 || (s1 & 1u));
     return v;
 }
@@ -99,38 +102,39 @@ uint8_t FEB_CAN_IVT_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignme
 }
 
 void FEB_CAN_IVT_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
+    UBaseType_t ux_status;
 	switch(rx_header->StdId) {
 	    case FEB_CAN_ID_IVT_CURRENT:
 			int32_t raw_current = (int32_t)((rx_data[2] << 24) | (rx_data[3] << 16) | (rx_data[4] << 8) | rx_data[5]);
             float val_mA = ((float)raw_current) * (-0.001f) * 1000.0f; // correct IVT for reversed direction
-            ivt_write_begin();
+            ux_status = ivt_write_begin_from_isr();
             FEB_CAN_IVT_Message.current_mA = val_mA;
-            ivt_write_end();
-            atomic_store_explicit(&IVT_CAN_flag.current, true, memory_order_relaxed);
+            ivt_write_end_from_isr(ux_status);
+            IVT_CAN_flag.current = true;
             break;
 
 	    case FEB_CAN_ID_IVT_VOLTAGE_1:
 			uint32_t raw_voltage_1 = ((uint32_t)rx_data[2] << 24) | ((uint32_t)rx_data[3] << 16) | ((uint32_t)rx_data[4] << 8) | (uint32_t)rx_data[5];
-            ivt_write_begin();
+            ux_status = ivt_write_begin_from_isr();
             FEB_CAN_IVT_Message.voltage_1_mV = (float)raw_voltage_1;
-            ivt_write_end();
-            atomic_store_explicit(&IVT_CAN_flag.voltage_1, true, memory_order_relaxed);
+            ivt_write_end_from_isr(ux_status);
+            IVT_CAN_flag.voltage_1 = true;
             break;
 
 	    case FEB_CAN_ID_IVT_VOLTAGE_2:
 			uint32_t raw_voltage_2 = ((uint32_t)rx_data[2] << 24) | ((uint32_t)rx_data[3] << 16) | ((uint32_t)rx_data[4] << 8) | (uint32_t)rx_data[5];
-            ivt_write_begin();
+            ux_status = ivt_write_begin_from_isr();
             FEB_CAN_IVT_Message.voltage_2_mV = (float)raw_voltage_2;
-            ivt_write_end();
-            atomic_store_explicit(&IVT_CAN_flag.voltage_2, true, memory_order_relaxed);
+            ivt_write_end_from_isr(ux_status);
+            IVT_CAN_flag.voltage_2 = true;
             break;
 
 	    case FEB_CAN_ID_IVT_VOLTAGE_3:
 			uint32_t raw_voltage_3 = ((uint32_t)rx_data[2] << 24) | ((uint32_t)rx_data[3] << 16) | ((uint32_t)rx_data[4] << 8) | (uint32_t)rx_data[5];
-            ivt_write_begin();
+            ux_status = ivt_write_begin_from_isr();
             FEB_CAN_IVT_Message.voltage_3_mV = (float)raw_voltage_3;
-            ivt_write_end();
-            atomic_store_explicit(&IVT_CAN_flag.voltage_3, true, memory_order_relaxed);
+            ivt_write_end_from_isr(ux_status);
+            IVT_CAN_flag.voltage_3 = true;
             break;
 		
 		default: 
@@ -141,13 +145,13 @@ void FEB_CAN_IVT_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
 void ivt_read_consistent(float *cur, float *v1, float *v2, float *v3) {
     unsigned s0, s1;
     do {
-        s0 = atomic_load_explicit(&FEB_CAN_IVT_Message.seq, memory_order_acquire);
+        s0 = FEB_CAN_IVT_Message.seq;
         if (s0 & 1u) continue;
         float c  = FEB_CAN_IVT_Message.current_mA;
         float x1 = FEB_CAN_IVT_Message.voltage_1_mV;
         float x2 = FEB_CAN_IVT_Message.voltage_2_mV;
         float x3 = FEB_CAN_IVT_Message.voltage_3_mV;
-        s1 = atomic_load_explicit(&FEB_CAN_IVT_Message.seq, memory_order_acquire);
+        s1 = FEB_CAN_IVT_Message.seq;
         if (s0 == s1 && !(s1 & 1u)) { *cur=c; *v1=x1; *v2=x2; *v3=x3; return; }
     } while (1);
 }
@@ -177,5 +181,5 @@ int32_t FEB_IVT_V1_Voltage(void) {
 }
 
 int32_t FEB_IVT_V1_Current(void) {
-    return (int32_t)ivt_read_field_consistant(&FEB_CAN_IVT_Message.current_mA);
+    return (int32_t)ivt_read_field_consistent(&FEB_CAN_IVT_Message.current_mA);
 }

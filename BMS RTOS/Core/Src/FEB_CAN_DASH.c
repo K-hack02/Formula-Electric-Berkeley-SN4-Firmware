@@ -2,11 +2,11 @@
 
 #include "FEB_CAN_DASH.h"
 
-#include <stdatomic.h>
+#include <stdbool.h>
 
 // ********************************** Variables **********************************
 
-static _Atomic(bool) r2d = false;
+static volatile bool r2d = false;
 
 // ********************************** Functions **********************************
 
@@ -37,16 +37,16 @@ uint8_t FEB_CAN_DASH_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignm
 	return filter_bank;
 }
 
+// Single Byte update from ISR doesn't need taskENTER_CRITICAL_FROM_ISR();
 void FEB_CAN_DASH_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
 	switch(rx_header->StdId) {
 		case FEB_CAN_DASH_IO_FRAME_ID:
-				bool value = ((rx_data[0] | 0b11111101) == 0b11111111);
-				atomic_store_explicit(&r2d, value, memory_order_release);
+				r2d = ((rx_data[0] | 0b11111101) == 0b11111111);
 				break;
 	}
 }
 
 
 bool FEB_CAN_DASH_Get_R2D(){
-	return atomic_load_explicit(&r2d, memory_order_acquire);
+	return r2d;
 }

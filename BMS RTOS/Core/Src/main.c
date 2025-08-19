@@ -28,6 +28,8 @@
 
 #include "FEB_SM.h"
 #include "FEB_Const.h"
+#include "FEB_ADBMS6830B.h"
+#include "FEB_CAN_Charger.h"
 
 /* USER CODE END Includes */
 
@@ -565,12 +567,14 @@ void Start_ADBMS_Task(void *argument)
       }
     }
 
-    FEB_Task_ADBMS();
+    FEB_Task_ADBMS_Voltage();
 
     if ((xTaskGetTickCount() - last_balance_time) >= balance_period) {
       FEB_Task_Balance();
       last_balance_time = xTaskGetTickCount();
     }
+
+    FEB_Task_ADBMS_Temperature();
 
     vTaskDelayUntil(&xLastWakeTime, adbms_period);
   }
@@ -627,8 +631,7 @@ void Start_Charging_Task(void *argument)
         FEB_CAN_Charger_Start_Charge();   
       } else if (charging_control == CHARGE_CTRL_STOP) {
         FEB_CAN_Charger_Stop_Charge(); 
-        const uint8_t charge_request = 1;
-	      xTaskNotify(ChargingHandle, charge_request, eSetValueWithOverwrite);
+	      xTaskNotify(CANHandle, (uint32_t)1, eSetValueWithOverwrite);
       }
     }
 
@@ -651,7 +654,8 @@ void Start_CAN_Task(void *argument)
   /* Infinite loop */
   TickType_t xLastWakeTime = xTaskGetTickCount();
   const TickType_t period = pdMS_TO_TICKS(10);
-  uint8_t can_charge_request;
+  uint32_t can_charge_request = 0;
+
   for(;;)
   {
     if (xTaskNotifyWait(0, 0xFFFFFFFF, &can_charge_request, 0) == pdPASS) {
