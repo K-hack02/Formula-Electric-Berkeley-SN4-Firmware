@@ -14,12 +14,16 @@ void    FEB_CAN_Charger_Init(void);
 void    FEB_CAN_Charger_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]);
 uint8_t FEB_CAN_Charger_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignment, uint8_t filter_bank);
 
+void    FEB_CAN_Charger_transmit(void);
+
+void    BMSmsg_read_consistent(uint16_t *max_voltage_dV, uint16_t *max_current_dA, uint8_t *control);
+void    CCSmsg_read_consistent(uint16_t *op_voltage_dV, uint16_t *op_current_dA, uint8_t *status, bool *received);
+
 bool    FEB_CAN_Charger_Received(void);
 void    FEB_CAN_Charger_Process(void);
 void    FEB_CAN_Charger_UART_Transmit(void);
 void    FEB_CAN_Charger_Start_Charge(void);
 void    FEB_CAN_Charger_Stop_Charge(void);
 bool    FEB_CAN_Charging_Status(void);
-void    FEB_CAN_Charger_Serial(void);
 
 #endif /* INC_FEB_CHARGE_H_ */

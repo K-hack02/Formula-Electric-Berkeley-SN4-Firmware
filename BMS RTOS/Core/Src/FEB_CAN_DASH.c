@@ -2,9 +2,11 @@
 
 #include "FEB_CAN_DASH.h"
 
+#include <stdatomic.h>
+
 // ********************************** Variables **********************************
 
-bool r2d = false;
+static _Atomic(bool) r2d = false;
 
 // ********************************** Functions **********************************
 
@@ -38,12 +40,13 @@ uint8_t FEB_CAN_DASH_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assignm
 void FEB_CAN_DASH_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
 	switch(rx_header->StdId) {
 		case FEB_CAN_DASH_IO_FRAME_ID:
-				r2d = ((rx_data[0] | 0b11111101) == 0b11111111);
+				bool value = ((rx_data[0] | 0b11111101) == 0b11111111);
+				atomic_store_explicit(&r2d, value, memory_order_release);
 				break;
 	}
 }
 
 
 bool FEB_CAN_DASH_Get_R2D(){
-	return r2d;
+	return atomic_load_explicit(&r2d, memory_order_acquire);
 }

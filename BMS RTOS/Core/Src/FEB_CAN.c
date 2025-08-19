@@ -72,7 +72,7 @@ void FEB_SM_CAN_Transmit(void) {
 
     (void)FEB_CAN_Send_Std(FEB_CAN_BMS_STATE_FRAME_ID, data, (uint8_t)sizeof(data));
 
-	FEB_CAN_Heartbeat_Reset_Last_Recieved(ping_alive);
+	FEB_CAN_Heartbeat_Reset_Last_Received(ping_alive);
 
     if (FEB_CAN_Heartbeat_Get_Initialized(ping_alive) > 0) {
         FEB_CAN_Heartbeat_Decrement_Initialized(ping_alive);
@@ -81,12 +81,12 @@ void FEB_SM_CAN_Transmit(void) {
     ping_alive = (FEB_DEV_INDEX)((ping_alive + 1) % FEB_NUM_CAN_DEV);
 
     for (int i = 0; i < (int)FEB_NUM_CAN_DEV; i++) {
-        FEB_CAN_Heartbeat_Increment_LaOn(ping_alive);
+        FEB_CAN_Heartbeat_Increment_LaOn((FEB_DEV_INDEX)i);
     }
 
-    int prev_device_index = (ping_alive == 0) ? (int)FEB_NUM_CAN_DEV - 1 : (int)ping_alive - 1;
+    FEB_DEV_INDEX prev_device_index = (ping_alive == 0) ? (int)FEB_NUM_CAN_DEV - 1 : (int)ping_alive - 1;
     
-    if (FEB_CAN_Heartbeat_Get_Last_Recieved(prev_device_index) == 0) {
+    if (FEB_CAN_Heartbeat_Get_Last_Received(prev_device_index) == 0) {
         FEB_CAN_Heartbeat_Increment_FAck(prev_device_index);
     }
 }
@@ -113,7 +113,7 @@ void FEB_CELL_CAN_Transmit(void)
 void FEB_ACC_VOLT_CAN_Transmit(void) {
     float pack_volt_V     = FEB_ADBMS_GET_ACC_Total_Voltage();
     float min_cell_volt_V = FEB_ADBMS_GET_ACC_MIN_Voltage();
-    float max_cell_volt_V = FEB_ADBMS_GET_Cell_Voltage(0, 0);
+    float max_cell_volt_V = FEB_ADBMS_GET_Cell_Voltage_V(0, 0);
 
     // Pack: pack voltage in dV (x100), cell min/max in mV (x1000)
     uint16_t pack_dV = (uint16_t)(pack_volt_V * 100.0f);

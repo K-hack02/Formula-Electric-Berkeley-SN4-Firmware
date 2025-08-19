@@ -44,11 +44,11 @@ uint8_t       FEB_CAN_Heartbeat_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t F
 FEB_DEV_STATUS FEB_GetStatus(FEB_DEV_INDEX device_index);
 FEB_DEV_STATUS FEB_COMBINED_STATUS(void);
 
-uint64_t FEB_CAN_Heartbeat_Get_Initialized(FEB_DEV_INDEX device_index);
+uint8_t FEB_CAN_Heartbeat_Get_Initialized(FEB_DEV_INDEX device_index);
 void FEB_CAN_Heartbeat_Decrement_Initialized(FEB_DEV_INDEX device_index);
 
-uint64_t FEB_CAN_Heartbeat_Get_Last_Recieved(FEB_DEV_INDEX device_index);
-void FEB_CAN_Heartbeat_Reset_Last_Recieved(FEB_DEV_INDEX device_index);
+uint32_t FEB_CAN_Heartbeat_Get_Last_Received(FEB_DEV_INDEX device_index);
+void FEB_CAN_Heartbeat_Reset_Last_Received(FEB_DEV_INDEX device_index);
 
 void FEB_CAN_Heartbeat_Increment_LaOn(FEB_DEV_INDEX device_index);
 void FEB_CAN_Heartbeat_Increment_FAck(FEB_DEV_INDEX device_index);

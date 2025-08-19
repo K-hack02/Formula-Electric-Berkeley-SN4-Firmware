@@ -3,8 +3,11 @@
 
 // ********************************** Includes ***********************************
 
+#include "FEB_Const.h"
+
 #include <stdint.h>
 #include <stdbool.h>
+#include "cmsis_os.h"
 
 // ********************************** ADBMS6830B Configuration *******************
 
@@ -67,13 +70,17 @@ typedef enum {
 	VRES
 } AUX_CH;
 
+#define RTOS_DELAY_MS(ms)  vTaskDelay( pdMS_TO_TICKS(ms) ? pdMS_TO_TICKS(ms) : 1 )
 
 // ********************************** Functions **********************************
 
 void FEB_ADBMS_Init(void);
 
-void FEB_ADBMS_Voltage_Process(void);
-void FEB_ADBMS_Temperature_Process(void);
+accumulator_t* ACC_BeginWrite(void);
+void ACC_Publish(void);
+
+void FEB_ADBMS_Voltage_Process(accumulator_t* FEB_ACC);
+void FEB_ADBMS_Temperature_Process(accumulator_t* FEB_ACC);
 
 void FEB_Cell_Balance_Start(void);
 void FEB_Cell_Balance_Process(void);
@@ -85,7 +92,9 @@ float FEB_ADBMS_GET_ACC_MIN_Voltage(void);
 float FEB_ADBMS_GET_ACC_MAX_Voltage(void);
 bool  FEB_ADBMS_Precharge_Complete(void);
 float FEB_ADBMS_GET_ACC_Total_Voltage(void);
-float FEB_ADBMS_GET_Cell_Voltage(uint8_t bank, uint16_t cell);
+float FEB_ADBMS_GET_Cell_Voltage_V(uint8_t bank, uint16_t cell);
+float FEB_ADBMS_GET_Cell_Voltage_S(uint8_t bank, uint16_t cell);
+uint8_t FEB_ADBMS_GET_Cell_Discharging(uint8_t bank, uint16_t cell);
 
 // ********************************** Temperature ********************************
 

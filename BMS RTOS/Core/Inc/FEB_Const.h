@@ -1,6 +1,8 @@
 #ifndef INC_FEB_CONST_H_
 #define INC_FEB_CONST_H_
 
+#include <stdint.h>
+
 #define FEB_SM_ST_DEBUG 1
 
 #define FEB_NUM_CELLS_PER_IC 10
@@ -51,6 +53,16 @@
 #define RDVR RD_ON
 
 // ********************************** Structs ************************************
+
+typedef enum {
+  CHARGE_CTRL_START = 1,
+  CHARGE_CTRL_STOP  = 2,
+} charge_ctrl_t;
+
+typedef enum {
+  BAL_CTRL_START = 1,
+  BAL_CTRL_STOP  = 2,
+} balance_ctrl_t;
 
 typedef enum {
 	FEB_SM_ST_BOOT,

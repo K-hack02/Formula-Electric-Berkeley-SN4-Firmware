@@ -4,6 +4,8 @@
 #include "FEB_SM.h" 
 #include "FEB_HW.h"
 #include "FEB_CAN_IVT.h"
+#include "FEB_ADBMS6830B.h"
+#include "FEB_CAN_Charger.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -11,58 +13,17 @@
 #include "stm32f4xx_hal.h"
 
 extern UART_HandleTypeDef huart2;
-extern accumulator_t      FEB_ACC;
 
-// ********************************** Functions **********************************
+// ********************************** Variables **********************************
 
-static uint8_t counter = 0;
+#define NUMLINES 5
+
 static char UART_line[256];
 
 // ********************************** Functions **********************************
 
-void FEB_UART_Transmit_Process(void) {
-    char buf[64];
-    int n = snprintf(buf, sizeof(buf), "Counter: %u\r\n", (unsigned)counter++);
-    if (n > 0) {
-        HAL_UART_Transmit(&huart2, (uint8_t*)buf, (uint16_t)n, 100);
-    }
-}
 
-void FEB_ADBMS_UART_Transmit() {
-	int NUMLINES=5;
-	for (uint8_t bank = 0; bank < FEB_NBANKS; bank++) {
-		char UART_line[NUMLINES][32*FEB_NUM_CELLS_PER_IC*FEB_NUM_ICPBANK];
-		int offset[NUMLINES];
-		offset[0]=sprintf((char*)(UART_line[0]),"|Bnk %d|",bank+1);
-		offset[1]=sprintf((char*)(UART_line[1]),"|Vlt C|");
-		offset[2]=sprintf((char*)(UART_line[2]),"|Vlt S|");
-		offset[3]=sprintf((char*)(UART_line[3]),"|Tmp 1|");
-		offset[4]=sprintf((char*)(UART_line[4]),"|DsChg|");
-		//offset[4]=sprintf((char*)(UART_line[5]),"|PWM  |");
-
-		for (uint8_t cell = 0; cell < FEB_NUM_CELLS_PER_IC*FEB_NUM_ICPBANK; cell++) {
-			offset[0]+=sprintf(((char*)(UART_line[0]) + offset[0]), (cell>=9)?"Cell  %d|":"Cell   %d|",cell+1);
-			float CV =FEB_ACC.banks[bank].cells[cell].voltage_V;
-			offset[1]+=sprintf(((char*)(UART_line[1]) + offset[1]), CV>0?"%.6f|":"%.5f|",CV);
-			float SV =FEB_ACC.banks[bank].cells[cell].voltage_S;
-			offset[2]+=sprintf(((char*)(UART_line[2]) + offset[2]), SV>0?"%.6f|":"%.5f|",SV);
-			offset[3]+=sprintf(((char*)(UART_line[3]) + offset[3]), "%.5f|",FEB_ACC.banks[bank].temp_sensor_readings_V[cell]);
-			offset[4]+=sprintf(((char*)(UART_line[4]) + offset[4]), FEB_ACC.banks[bank].cells[cell].discharging==1?"True  |":"False |");
-			//offset[5]+=sprintf(((char*)(UART_line[4]) + offset[4]), "%X|",FEB_ACC.banks[bank].temp_sensor_readings_V[cell+16]);
-		}
-
-		offset[NUMLINES-1]+=sprintf(((char*)(UART_line[NUMLINES-1]) + offset[NUMLINES-1]), "\n\r");
-		char Bank_line[NUMLINES*32*FEB_NUM_CELLS_PER_IC*FEB_NUM_ICPBANK];
-		int index =0;
-		for(int line=0;line<NUMLINES;line++){
-			offset[line]+=sprintf(((char*)(UART_line[line]) + offset[line]), "\n\r") ;
-			index+=sprintf(((char*)Bank_line)+index,UART_line[line]);
-		}
-
-		if(bank+1==FEB_NBANKS)index+=sprintf(((char*)Bank_line)+index,"Total voltage: %f \n\r",FEB_ACC.total_voltage_V);
-		HAL_UART_Transmit(&huart2, (uint8_t*) Bank_line, index+1, 100);
-	}
-}
+// ********************************** GUI ****************************************
 
 void FEB_MONITOR_UART_Transmit(){
 	for (uint8_t bank = 0; bank < FEB_NBANKS; bank++) {
@@ -73,18 +34,18 @@ void FEB_MONITOR_UART_Transmit(){
 					cell
 				);
 			i+=sprintf(((char*)(UART_line)+i)," %.6f",
-					FEB_ACC.banks[bank].cells[cell].voltage_V);
+					FEB_ADBMS_GET_Cell_Voltage_V(bank,cell));
 			i+=sprintf(((char*)(UART_line)+i)," %.6f",
-					FEB_ACC.banks[bank].cells[cell].voltage_S);
+					FEB_ADBMS_GET_Cell_Voltage_S(bank,cell));
 			i+=sprintf(((char*)(UART_line)+i)," %.6f",
-					FEB_ACC.banks[bank].temp_sensor_readings_V[cell]);
+					FEB_ADBMS_GET_Cell_Temperature(bank, cell));
 			i+=sprintf(((char*)(UART_line)+i)," %s\n",
-					((FEB_ACC.banks[bank].cells[cell].discharging)==1?"true":"false"));
+					(FEB_ADBMS_GET_Cell_Discharging(bank, cell)==1?"true":"false"));
 
 			HAL_UART_Transmit(&huart2, (uint8_t*) UART_line, strlen(UART_line), 100);
 		}
 	}
-
+	
 	sprintf(((char*)(UART_line)),"relay %s %s %s\n",
 			FEB_PIN_RD(PN_AIRP_SENSE) == 0 ? "true":"false",
 			FEB_PIN_RD(PN_AIRM_SENSE) == 0 ? "true":"false",
@@ -92,7 +53,81 @@ void FEB_MONITOR_UART_Transmit(){
 			);
 
 	HAL_UART_Transmit(&huart2, (uint8_t*) UART_line, strlen(UART_line), 100);
+}
 
+void FEB_IVT_Serial() {
+	static char str[128];
+	
+	float cur;
+	float v1; 
+	float v2; 
+	float v3; 
+
+	ivt_read_consistent(&cur, &v1, &v2, &v3);
+	sprintf(str, "ivt %f %f %f %f\n", cur, v1, v2, v3);
+	HAL_UART_Transmit(&huart2, (uint8_t*) str, strlen(str), 100);
+}
+
+void FEB_CAN_Charger_Serial(void) {
+	static char str[128];
+	
+	uint16_t max_voltage_dV;
+	uint16_t max_current_dA; 
+	uint8_t control; 
+	BMSmsg_read_consistent(&max_voltage_dV, &max_current_dA, &control);
+
+	uint16_t op_voltage_dV;
+	uint16_t op_current_dA;
+	uint8_t status; 
+	bool received;
+    CCSmsg_read_consistent(&op_voltage_dV, &op_current_dA, &status, &received);
+
+	sprintf(str, "charger1 %d %d %d\n", max_voltage_dV, max_current_dA, control);
+	HAL_UART_Transmit(&huart2, (uint8_t*) str, strlen(str), 100);
+
+	sprintf(str, "charger2 %d %d %d\n", op_voltage_dV, op_current_dA, status);
+	HAL_UART_Transmit(&huart2, (uint8_t*) str, strlen(str), 100);
+}
+
+// ********************************** Debugging **********************************
+
+void FEB_ADBMS_UART_Transmit() {
+	for (uint8_t bank = 0; bank < FEB_NBANKS; bank++) {
+		static char UART_line[NUMLINES][32*FEB_NUM_CELLS_PER_IC*FEB_NUM_ICPBANK];
+		int offset[NUMLINES];
+		offset[0]=sprintf((char*)(UART_line[0]),"|Bnk %d|",bank+1);
+		offset[1]=sprintf((char*)(UART_line[1]),"|Vlt C|");
+		offset[2]=sprintf((char*)(UART_line[2]),"|Vlt S|");
+		offset[3]=sprintf((char*)(UART_line[3]),"|Tmp 1|");
+		offset[4]=sprintf((char*)(UART_line[4]),"|DsChg|");
+		//offset[4]=sprintf((char*)(UART_line[5]),"|PWM  |");
+
+		for (uint8_t cell = 0; cell < FEB_NUM_CELLS_PER_IC*FEB_NUM_ICPBANK; cell++) {
+			offset[0]+=sprintf(((char*)(UART_line[0]) + offset[0]), (cell>=9)?"Cell  %d|":"Cell   %d|",cell+1);
+			float CV = FEB_ADBMS_GET_Cell_Voltage_V(bank,cell);
+			offset[1]+=sprintf(((char*)(UART_line[1]) + offset[1]), CV>0?"%.6f|":"%.5f|",CV);
+			float SV = FEB_ADBMS_GET_Cell_Voltage_S(bank,cell);
+			offset[2]+=sprintf(((char*)(UART_line[2]) + offset[2]), SV>0?"%.6f|":"%.5f|",SV);
+			float temp = FEB_ADBMS_GET_Cell_Temperature(bank, cell);
+			offset[3]+=sprintf(((char*)(UART_line[3]) + offset[3]), "%.5f|",temp);
+			uint8_t discharging = FEB_ADBMS_GET_Cell_Discharging(bank, cell);
+			offset[4]+=sprintf(((char*)(UART_line[4]) + offset[4]), discharging==1?"True  |":"False |");
+			//offset[5]+=sprintf(((char*)(UART_line[4]) + offset[4]), "%X|",FEB_ACC.banks[bank].temp_sensor_readings_V[cell+16]);
+		}
+
+		offset[NUMLINES-1]+=sprintf(((char*)(UART_line[NUMLINES-1]) + offset[NUMLINES-1]), "\n\r");
+		static char Bank_line[NUMLINES*32*FEB_NUM_CELLS_PER_IC*FEB_NUM_ICPBANK];
+		int index =0;
+		for(int line=0;line<NUMLINES;line++){
+			offset[line]+=sprintf(((char*)(UART_line[line]) + offset[line]), "\n\r") ;
+			index+=sprintf(((char*)Bank_line)+index,UART_line[line]);
+		}
+
+		float total_voltage = FEB_ADBMS_GET_ACC_Total_Voltage();
+
+		if(bank+1==FEB_NBANKS)index+=sprintf(((char*)Bank_line)+index,"Total voltage: %f \n\r",total_voltage);
+		HAL_UART_Transmit(&huart2, (uint8_t*) Bank_line, index+1, 100);
+	}
 }
 
 void FEB_SM_UART_Transmit(void) {
@@ -266,4 +301,25 @@ void FEB_Transmit_AIR_Status(){
 	HAL_UART_Transmit(&huart2, (uint8_t*) str3, strlen(str3), 100);
 	HAL_UART_Transmit(&huart2, (uint8_t*) str4, strlen(str4), 100);
 	HAL_UART_Transmit(&huart2, (uint8_t*) str6, strlen(str6), 100);
+}
+
+void FEB_CAN_Charger_UART_Transmit(void) {
+	static char str[128];
+
+	uint16_t max_voltage_dV;
+	uint16_t max_current_dA; 
+	uint8_t control; 
+	BMSmsg_read_consistent(&max_voltage_dV, &max_current_dA, &control);
+
+	uint16_t op_voltage_dV;
+	uint16_t op_current_dA;
+	uint8_t status; 
+	bool received;
+    CCSmsg_read_consistent(&op_voltage_dV, &op_current_dA, &status, &received);
+	
+	sprintf(str, "Charger: Max_V: %d Max_A: %d Control: %d OP_V: %d OP_A: %d Status: %d Recieved: %d\n",
+		max_voltage_dV, max_current_dA, control,
+		op_voltage_dV, op_current_dA, status, received);
+
+	HAL_UART_Transmit(&huart2, (uint8_t*) str, strlen(str), 100);
 }

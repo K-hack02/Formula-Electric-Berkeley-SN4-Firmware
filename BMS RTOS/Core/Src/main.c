@@ -18,9 +18,16 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+#include "task.h"
+#include "FreeRTOS.h"
+
+#include "FEB_SM.h"
+#include "FEB_Const.h"
 
 /* USER CODE END Includes */
 
@@ -48,6 +55,58 @@ SPI_HandleTypeDef hspi1;
 
 UART_HandleTypeDef huart2;
 
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for ADBMS */
+osThreadId_t ADBMSHandle;
+const osThreadAttr_t ADBMS_attributes = {
+  .name = "ADBMS",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
+/* Definitions for State_Machine */
+osThreadId_t State_MachineHandle;
+const osThreadAttr_t State_Machine_attributes = {
+  .name = "State_Machine",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
+/* Definitions for Charging */
+osThreadId_t ChargingHandle;
+const osThreadAttr_t Charging_attributes = {
+  .name = "Charging",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for CAN */
+osThreadId_t CANHandle;
+const osThreadAttr_t CAN_attributes = {
+  .name = "CAN",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal,
+};
+/* Definitions for UART */
+osThreadId_t UARTHandle;
+const osThreadAttr_t UART_attributes = {
+  .name = "UART",
+  .stack_size = 875 * 4,
+  .priority = (osPriority_t) osPriorityBelowNormal,
+};
+/* Definitions for Charging_Control */
+osMessageQueueId_t Charging_ControlHandle;
+const osMessageQueueAttr_t Charging_Control_attributes = {
+  .name = "Charging_Control"
+};
+/* Definitions for Balance_Control */
+osMessageQueueId_t Balance_ControlHandle;
+const osMessageQueueAttr_t Balance_Control_attributes = {
+  .name = "Balance_Control"
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -59,6 +118,13 @@ static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_I2C1_Init(void);
+void StartDefaultTask(void *argument);
+void Start_ADBMS_Task(void *argument);
+void Start_State_Machine_Task(void *argument);
+void Start_Charging_Task(void *argument);
+void Start_CAN_Task(void *argument);
+void Start_UART_Task(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -107,6 +173,64 @@ int main(void)
 
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* creation of Charging_Control */
+  Charging_ControlHandle = osMessageQueueNew (5, sizeof(uint8_t), &Charging_Control_attributes);
+
+  /* creation of Balance_Control */
+  Balance_ControlHandle = osMessageQueueNew (5, sizeof(uint8_t), &Balance_Control_attributes);
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of ADBMS */
+  ADBMSHandle = osThreadNew(Start_ADBMS_Task, NULL, &ADBMS_attributes);
+
+  /* creation of State_Machine */
+  State_MachineHandle = osThreadNew(Start_State_Machine_Task, NULL, &State_Machine_attributes);
+
+  /* creation of Charging */
+  ChargingHandle = osThreadNew(Start_Charging_Task, NULL, &Charging_attributes);
+
+  /* creation of CAN */
+  CANHandle = osThreadNew(Start_CAN_Task, NULL, &CAN_attributes);
+
+  /* creation of UART */
+  UARTHandle = osThreadNew(Start_UART_Task, NULL, &UART_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -114,10 +238,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  FEB_Task_ADBMS();
-	  FEB_Task_SM();
-	  FEB_Task_CAN();
-	  FEB_Task_UART();
   }
   /* USER CODE END 3 */
 }
@@ -318,8 +438,8 @@ static void MX_USART2_UART_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -392,17 +512,182 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
 
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_Start_ADBMS_Task */
+/**
+* @brief Function implementing the ADBMS thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_ADBMS_Task */
+void Start_ADBMS_Task(void *argument)
+{
+  /* USER CODE BEGIN Start_ADBMS_Task */
+  /* Infinite loop */
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  const TickType_t adbms_period = pdMS_TO_TICKS(20);
+  const TickType_t balance_period = pdMS_TO_TICKS(2000);
+  TickType_t last_balance_time = xLastWakeTime;
+  uint8_t balance_control;
+
+  for(;;)
+  {
+    while (osMessageQueueGet(Balance_ControlHandle, &balance_control, NULL, 0) == osOK) {
+      if (balance_control == BAL_CTRL_START) {
+        FEB_Cell_Balance_Start();
+      } else if (balance_control == BAL_CTRL_STOP) {
+        FEB_Stop_Balance();
+      }
+    }
+
+    FEB_Task_ADBMS();
+
+    if ((xTaskGetTickCount() - last_balance_time) >= balance_period) {
+      FEB_Task_Balance();
+      last_balance_time = xTaskGetTickCount();
+    }
+
+    vTaskDelayUntil(&xLastWakeTime, adbms_period);
+  }
+  /* USER CODE END Start_ADBMS_Task */
+}
+
+/* USER CODE BEGIN Header_Start_State_Machine_Task */
+/**
+* @brief Function implementing the State_Machine thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_State_Machine_Task */
+void Start_State_Machine_Task(void *argument)
+{
+  /* USER CODE BEGIN Start_State_Machine_Task */
+  /* Infinite loop */
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  const TickType_t period = pdMS_TO_TICKS(10);
+  uint32_t notified_value;
+
+  for(;;)
+  {
+    if (xTaskNotifyWait(0, 0xFFFFFFFF, &notified_value, 0) == pdPASS) {
+      FEB_SM_ST_t requested_fault = (FEB_SM_ST_t)notified_value;
+      FEB_SM_Transition(requested_fault);
+    }
+
+    FEB_Task_SM();
+    vTaskDelayUntil(&xLastWakeTime, period);
+  }
+  /* USER CODE END Start_State_Machine_Task */
+}
+
+/* USER CODE BEGIN Header_Start_Charging_Task */
+/**
+* @brief Function implementing the Charging thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_Charging_Task */
+void Start_Charging_Task(void *argument)
+{
+  /* USER CODE BEGIN Start_Charging_Task */
+  /* Infinite loop */
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  const TickType_t period = pdMS_TO_TICKS(50);
+  uint8_t charging_control;
+
+  for(;;) {
+    
+    while (osMessageQueueGet(Charging_ControlHandle, &charging_control, NULL, 0) == osOK) {
+      if (charging_control == CHARGE_CTRL_START) {
+        FEB_CAN_Charger_Start_Charge();   
+      } else if (charging_control == CHARGE_CTRL_STOP) {
+        FEB_CAN_Charger_Stop_Charge(); 
+        const uint8_t charge_request = 1;
+	      xTaskNotify(ChargingHandle, charge_request, eSetValueWithOverwrite);
+      }
+    }
+
+    FEB_Task_Charging();
+    vTaskDelayUntil(&xLastWakeTime, period);
+  }
+  /* USER CODE END Start_Charging_Task */
+}
+
+/* USER CODE BEGIN Header_Start_CAN_Task */
+/**
+* @brief Function implementing the CAN thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_CAN_Task */
+void Start_CAN_Task(void *argument)
+{
+  /* USER CODE BEGIN Start_CAN_Task */
+  /* Infinite loop */
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  const TickType_t period = pdMS_TO_TICKS(10);
+  uint8_t can_charge_request;
+  for(;;)
+  {
+    if (xTaskNotifyWait(0, 0xFFFFFFFF, &can_charge_request, 0) == pdPASS) {
+      FEB_Task_CAN_Charging();
+    }
+
+    FEB_Task_CAN();
+    vTaskDelayUntil(&xLastWakeTime, period);
+  }
+  /* USER CODE END Start_CAN_Task */
+}
+
+/* USER CODE BEGIN Header_Start_UART_Task */
+/**
+* @brief Function implementing the UART thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Start_UART_Task */
+void Start_UART_Task(void *argument)
+{
+  /* USER CODE BEGIN Start_UART_Task */
+  /* Infinite loop */
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  const TickType_t period = pdMS_TO_TICKS(1000);
+  for(;;)
+  {
+    FEB_Task_UART();
+    vTaskDelayUntil(&xLastWakeTime, period);
+  }
+  /* USER CODE END Start_UART_Task */
+}
+
 /**
   * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM1 interrupt took place, inside
+  * @note   This function is called  when TIM2 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
   * a global variable "uwTick" used as application time base.
   * @param  htim : TIM handle
@@ -413,7 +698,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM1) {
+  if (htim->Instance == TIM2)
+  {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */

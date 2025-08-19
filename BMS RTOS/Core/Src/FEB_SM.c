@@ -9,11 +9,15 @@
 #include "FEB_CAN_Charger.h"
 #include "FEB_CAN_Heartbeat.h"
 
+#include <stdatomic.h>
 #include "stm32f4xx_hal.h"
+
+extern osMessageQueueId_t Charging_ControlHandle;
+extern osMessageQueueId_t Balance_ControlHandle;
 
 // ********************************** Variables **********************************
 
-static FEB_SM_ST_t SM_Current_State;
+static _Atomic(FEB_SM_ST_t) SM_Current_State;
 
 // ********************************** Transition Functions ***********************
 
@@ -73,7 +77,7 @@ void FEB_SM_Init(void) {
 }
 
 FEB_SM_ST_t FEB_SM_Get_Current_State(void) {
-	return SM_Current_State;
+    return atomic_load_explicit(&SM_Current_State, memory_order_acquire);
 }
 
 void FEB_SM_Transition(FEB_SM_ST_t next_state) {
@@ -97,7 +101,7 @@ static void fault(FEB_SM_ST_t FAULT_TYPE) {
 	FEB_PIN_SET(PN_INDICATOR);
 
 	//Delay before resetting signals
-	HAL_Delay(500);
+	RTOS_DELAY_MS(500);
 
 	// Open air+ and precharge relays for redundancy
 	FEB_PIN_RST(PN_PC_AIR); 
@@ -236,7 +240,7 @@ static void PrechargeTransition(FEB_SM_ST_t next_state){
 	case FEB_SM_ST_ENERGIZED:
 		// Close air- and open precharge
 		FEB_PIN_SET(PN_PC_AIR);
-		HAL_Delay(500);
+		RTOS_DELAY_MS(500);
 		FEB_PIN_RST(PN_PC_REL);
 		updateStateProtected(FEB_SM_ST_ENERGIZED);
 		break;
@@ -366,7 +370,10 @@ static void FreeTransition(FEB_SM_ST_t next_state){
 		updateStateProtected(next_state);
 		break;
 	case FEB_SM_ST_BALANCE:
-		FEB_Cell_Balance_Start();
+		{
+			uint8_t control = BAL_CTRL_START;
+			(void)osMessageQueuePut(Balance_ControlHandle, &control, 0, 0);
+		}
 		updateStateProtected(next_state);
 		break;
 	case FEB_SM_ST_DEFAULT:
@@ -415,9 +422,12 @@ static void ChargingPrechargeTransition(FEB_SM_ST_t next_state) {
 	case FEB_SM_ST_CHARGING:
 		//Close air+ and open precharge
 		FEB_PIN_SET(PN_PC_AIR);
-		HAL_Delay(500);
+		RTOS_DELAY_MS(500);
 		FEB_PIN_RST(PN_PC_REL);
-		FEB_CAN_Charger_Start_Charge();
+		{
+			uint8_t control = CHARGE_CTRL_START;
+			(void)osMessageQueuePut(Charging_ControlHandle, &control, 0, 0);
+		}
 		updateStateProtected(next_state);
 		break;
 	case FEB_SM_ST_BALANCE:
@@ -453,7 +463,10 @@ static void ChargingTransition(FEB_SM_ST_t next_state){
 	case FEB_SM_ST_FAULT_IMD:
 	case FEB_SM_ST_FAULT_CHARGING:
 		// Stop Charging
-		FEB_CAN_Charger_Stop_Charge();
+		{
+			uint8_t control = CHARGE_CTRL_STOP;
+    		(void)osMessageQueuePut(Charging_ControlHandle, &control, 0, 0);
+		}
 		fault(FEB_SM_ST_FAULT_CHARGING);
 		break;
 
@@ -462,16 +475,15 @@ static void ChargingTransition(FEB_SM_ST_t next_state){
 		// Open air+ and precharge relays - stop charging
 		FEB_PIN_RST(PN_PC_AIR);
 		FEB_PIN_RST(PN_PC_REL);
-		FEB_CAN_Charger_Stop_Charge();
+		{
+			uint8_t control = CHARGE_CTRL_STOP;
+    		(void)osMessageQueuePut(Charging_ControlHandle, &control, 0, 0);
+		}
 		updateStateProtected(FEB_SM_ST_FREE);
 		break;
 
 	case FEB_SM_ST_DEFAULT:
-
-		FEB_CAN_Charger_Process();
-		
 		bool charge_status = FEB_CAN_Charging_Status();
-
 		//If accumulator charing status is out of bounds or shutdown circuit(air-) open
 		if (!charge_status || FEB_PIN_RD(PN_AIRM_SENSE)==FEB_RELAY_STATE_OPEN ) {
 			ChargingTransition(FEB_SM_ST_FREE);
@@ -489,7 +501,10 @@ static void BalanceTransition(FEB_SM_ST_t next_state){
 	case FEB_SM_ST_FAULT_BMS:
 	case FEB_SM_ST_FAULT_IMD:
 		//Stop Balancing
-		FEB_Stop_Balance();	
+		{
+			uint8_t control = BAL_CTRL_STOP;
+    		(void)osMessageQueuePut(Balance_ControlHandle, &control, 0, 0);
+		}
 		fault(FEB_SM_ST_FAULT_CHARGING);
 		break;
 
@@ -498,21 +513,19 @@ static void BalanceTransition(FEB_SM_ST_t next_state){
 		// Open air+ and precharge relays for redundancy
 		FEB_PIN_RST(PN_PC_AIR);
 		FEB_PIN_RST(PN_PC_REL);
-		FEB_Stop_Balance();
+		{
+			uint8_t control = BAL_CTRL_STOP;
+    		(void)osMessageQueuePut(Balance_ControlHandle, &control, 0, 0);
+		}
 		updateStateProtected(FEB_SM_ST_FREE);
 		break;
 
 	case FEB_SM_ST_DEFAULT:
-
-		FEB_Cell_Balance_Process();
-
 		bool balance_status = FEB_Cell_Balancing_Status();
-
 		//If accumulator charing status is out of bounds or shutdown circuit(air-) open
 		if (!balance_status || FEB_PIN_RD(PN_AIRM_SENSE)==FEB_RELAY_STATE_OPEN ) {
 			ChargingTransition(FEB_SM_ST_FREE);
 		}
-
 		break;
 
 	default:

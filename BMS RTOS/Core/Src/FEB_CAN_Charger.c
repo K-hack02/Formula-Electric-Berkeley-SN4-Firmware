@@ -5,15 +5,19 @@
 #include "FEB_Config.h"
 #include "FEB_ADBMS6830B.h"
 
-#include <string.h>
+#include "cmsis_os2.h"
 #include <stdio.h>
+#include <string.h>
 #include <stddef.h>
+#include <stdatomic.h>
 
 extern CAN_HandleTypeDef hcan1;
 extern UART_HandleTypeDef huart2;
 extern uint8_t FEB_CAN_Tx_Data[8];
 extern CAN_TxHeaderTypeDef FEB_CAN_Tx_Header;
 extern uint32_t FEB_CAN_Tx_Mailbox;
+
+extern osThreadId_t ChargingHandle;
 
 // ********************************** Charger CAN IDs ****************************
 
@@ -23,13 +27,14 @@ extern uint32_t FEB_CAN_Tx_Mailbox;
 // ********************************** Structs ************************************
 
 typedef struct {
+	atomic_uint seq;
 	uint16_t max_voltage_dV;		// Deci-volts
 	uint16_t max_current_dA;		// Deci-amps
 	uint8_t control;				// 0 (start charge), 1 (stop charge)
-	bool done_charging;
 } BMS_Charger_Message_t;
 
 typedef struct {
+	atomic_uint seq;
 	uint16_t op_voltage_dV;			// Operating voltage
 	uint16_t op_current_dA;			// Operating current
 	uint8_t status;
@@ -41,25 +46,67 @@ typedef struct {
 static BMS_Charger_Message_t BMS_Charger_Message;
 static CCS_message_t CCS_message;
 
-
+static bool done_charging = false;
 static bool charging_on = true;
 
 static bool     trickle_charge_enabled = false;
 static bool     trickle_pwm_on         = true;
 static uint32_t trickle_last_toggle_ms = 0;
 
-// ********************************** Internals **********************************
+// ********************************** Static Functions ***************************
 
-static void charger_CAN_transmit(void);
+static inline void BMSmsg_write_begin(void) {
+    atomic_fetch_add_explicit(&BMS_Charger_Message.seq, 1u, memory_order_relaxed);
+}
+static inline void BMSmsg_write_end(void) {
+    atomic_fetch_add_explicit(&BMS_Charger_Message.seq, 1u, memory_order_release);
+}
 
+void BMSmsg_read_consistent(uint16_t *max_voltage_dV, uint16_t *max_current_dA, uint8_t *control) {
+    unsigned s0, s1;
+    do {
+        s0 = atomic_load_explicit(&BMS_Charger_Message.seq, memory_order_acquire);
+        if (s0 & 1u) continue;
+        uint16_t v   = BMS_Charger_Message.max_voltage_dV;
+        uint16_t i   = BMS_Charger_Message.max_current_dA;
+        uint8_t  c   = BMS_Charger_Message.control;
+        s1 = atomic_load_explicit(&BMS_Charger_Message.seq, memory_order_acquire);
+        if (s0 == s1 && !(s1 & 1u)) { *max_voltage_dV=v; *max_current_dA=i; *control=c; return; }
+    } while (1);
+}
+
+static inline void CCSmsg_write_begin(void) {
+    atomic_fetch_add_explicit(&CCS_message.seq, 1u, memory_order_relaxed);
+}
+
+static inline void CCSmsg_write_end(void) {
+    atomic_fetch_add_explicit(&CCS_message.seq, 1u, memory_order_release);
+}
+
+void CCSmsg_read_consistent(uint16_t *op_voltage_dV, uint16_t *op_current_dA, uint8_t *status, bool *received) {
+    unsigned s0, s1; uint16_t v,i; uint8_t st; bool rc;
+    do {
+        s0 = atomic_load_explicit(&CCS_message.seq, memory_order_acquire);
+        if (s0 & 1u) continue;
+        v  = CCS_message.op_voltage_dV;
+        i  = CCS_message.op_current_dA;
+        st = CCS_message.status;
+        rc = CCS_message.received;
+        s1 = atomic_load_explicit(&CCS_message.seq, memory_order_acquire);
+		if (s0 == s1 && !(s1 & 1u)) { *op_voltage_dV = v; *op_current_dA = i; *status = st; *received = rc; return; }
+    } while (1);
+}
 // ********************************** Functions **********************************
 
 void FEB_CAN_Charger_Init(void) {
+	atomic_store_explicit(&BMS_Charger_Message.seq, 0u, memory_order_relaxed);
 	BMS_Charger_Message.max_voltage_dV = (uint16_t)(FEB_NBANKS * FEB_NUM_CELL_PER_BANK * (uint16_t)(FEB_Config_Get_Cell_Max_Voltage_mV() * 1e-2));
 	BMS_Charger_Message.max_current_dA = CHARGE_CURRENT_dA;
 	BMS_Charger_Message.control = 1;
-	BMS_Charger_Message.done_charging = false;
+	
+	done_charging = false;
 
+	atomic_store_explicit(&CCS_message.seq, 0u, memory_order_relaxed);
 	CCS_message.received = false;
 }
 
@@ -88,15 +135,17 @@ uint8_t FEB_CAN_Charger_Filter_Config(CAN_HandleTypeDef* hcan, uint8_t FIFO_assi
 void FEB_CAN_Charger_Store_Msg(CAN_RxHeaderTypeDef *rx_header, uint8_t rx_data[]) {
 	switch(rx_header->ExtId) {
 	    case FEB_CAN_ID_CHARGER_CCS:
+			CCSmsg_write_begin();
 	    	CCS_message.op_voltage_dV = (uint16_t) (rx_data[0] << 8) + rx_data[1];
 	    	CCS_message.op_current_dA = (uint16_t) (rx_data[2] << 8) + rx_data[3];
 	    	CCS_message.status = rx_data[4];
 	    	CCS_message.received = true;
+			CCSmsg_write_end();
 			break;
 	}
 }
 
-static void charger_CAN_transmit(void) {
+void FEB_CAN_Charger_transmit(void) {
 	// Initialize transmission header
 	FEB_CAN_Tx_Header.DLC = 8;
 	FEB_CAN_Tx_Header.ExtId = FEB_CAN_ID_CHARGER_BMS;
@@ -104,12 +153,18 @@ static void charger_CAN_transmit(void) {
 	FEB_CAN_Tx_Header.RTR = CAN_RTR_DATA;
 	FEB_CAN_Tx_Header.TransmitGlobalTime = DISABLE;
 
+	uint16_t max_voltage_dV;
+	uint16_t max_current_dA; 
+	uint8_t control; 
+
+    BMSmsg_read_consistent(&max_voltage_dV, &max_current_dA, &control);
+
 	// Copy data to Tx buffer
-	FEB_CAN_Tx_Data[0] = BMS_Charger_Message.max_voltage_dV >> 8;
-	FEB_CAN_Tx_Data[1] = BMS_Charger_Message.max_voltage_dV & 0xFF;
-	FEB_CAN_Tx_Data[2] = BMS_Charger_Message.max_current_dA >> 8;
-	FEB_CAN_Tx_Data[3] = BMS_Charger_Message.max_current_dA & 0xFF;
-	FEB_CAN_Tx_Data[4] = BMS_Charger_Message.control;
+	FEB_CAN_Tx_Data[0] = (uint8_t)(max_voltage_dV >> 8);
+	FEB_CAN_Tx_Data[1] = (uint8_t)(max_voltage_dV & 0xFF);
+	FEB_CAN_Tx_Data[2] = (uint8_t)(max_current_dA >> 8);
+	FEB_CAN_Tx_Data[3] = (uint8_t)(max_current_dA & 0xFF);
+	FEB_CAN_Tx_Data[4] = control;
 	FEB_CAN_Tx_Data[5] = 0;
 	FEB_CAN_Tx_Data[6] = 0;
 	FEB_CAN_Tx_Data[7] = 0;
@@ -124,9 +179,11 @@ static void charger_CAN_transmit(void) {
 }
 
 static void charger_set_limits(uint16_t max_voltage_dV, uint16_t max_current_dA, uint8_t control) {
+	BMSmsg_write_begin();
     BMS_Charger_Message.max_voltage_dV = max_voltage_dV;
     BMS_Charger_Message.max_current_dA = max_current_dA;
     BMS_Charger_Message.control        = control;
+	BMSmsg_write_end();
 }
 
 
@@ -180,18 +237,23 @@ void FEB_CAN_Charger_Process(void) {
 		charger_set_limits(TRICKLE_CHARGE_MAX_VOLTAGE_dV, CHARGE_CURRENT_dA, 0);
         charging_on = true;
     }
-	charger_CAN_transmit();
+
+	const uint8_t charge_request = 1;
+	xTaskNotify(ChargingHandle, charge_request, eSetValueWithOverwrite);
 }
 
 
 void FEB_CAN_Charger_Start_Charge(void) {
+	BMSmsg_write_begin();
 	BMS_Charger_Message.control = 0;
+	BMSmsg_write_end();
 }
 
 void FEB_CAN_Charger_Stop_Charge(void) {
+	BMSmsg_write_begin();
 	BMS_Charger_Message.control = 1;
-	BMS_Charger_Message.done_charging = true;
-
+	done_charging = true;
+	BMSmsg_write_end();
 }
 
 bool FEB_CAN_Charger_Received(void){
@@ -199,7 +261,7 @@ bool FEB_CAN_Charger_Received(void){
 }
 
 bool FEB_CAN_Charging_Status(void) {
-    if (BMS_Charger_Message.done_charging) {
+    if (done_charging) {
         return false;
     }
 
@@ -209,7 +271,7 @@ bool FEB_CAN_Charging_Status(void) {
 
     for (size_t i = 0; i < FEB_NBANKS; ++i) {
         for (size_t j = 0; j < FEB_NUM_CELL_PER_BANK; ++j) {
-            const float v = FEB_ADBMS_GET_Cell_Voltage(i, j) * 1000.0f;
+            const float v = FEB_ADBMS_GET_Cell_Voltage_V(i, j) * 1000.0f;
             const float t = FEB_ADBMS_GET_Cell_Temperature(i, j) * 10.0f;
 
             if (v >= FEB_CONFIG_CELL_SOFT_MAX_VOLTAGE_mV) {
@@ -223,24 +285,3 @@ bool FEB_CAN_Charging_Status(void) {
 
     return true;
 }
-
-void FEB_CAN_Charger_Serial(void) {
-	static char str[128];
-	
-	sprintf(str, "charger1 %d %d %d\n",BMS_Charger_Message.max_voltage_dV, BMS_Charger_Message.max_current_dA, BMS_Charger_Message.control);
-	HAL_UART_Transmit(&huart2, (uint8_t*) str, strlen(str), 100);
-	
-	sprintf(str, "charger2 %d %d %d\n", CCS_message.op_voltage_dV, CCS_message.op_current_dA, CCS_message.status);
-	HAL_UART_Transmit(&huart2, (uint8_t*) str, strlen(str), 100);
-}
-
-void FEB_CAN_Charger_UART_Transmit(void) {
-	static char str[128];
-	
-	sprintf(str, "Charger: Max_V: %d Max_A: %d Control: %d OP_V: %d OP_A: %d Status: %d Recieved: %d\n",
-		BMS_Charger_Message.max_voltage_dV, BMS_Charger_Message.max_current_dA, BMS_Charger_Message.control,
-		CCS_message.op_voltage_dV, CCS_message.op_current_dA, CCS_message.status, CCS_message.received);
-
-	HAL_UART_Transmit(&huart2, (uint8_t*) str, strlen(str), 100);
-}
-

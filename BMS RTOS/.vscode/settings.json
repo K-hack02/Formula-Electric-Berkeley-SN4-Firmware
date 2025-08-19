@@ -17,6 +17,10 @@
         "feb_can.h": "c",
         "feb_can_heartbeat.h": "c",
         "feb_can_charger.h": "c",
-        "feb_const.h": "c"
+        "feb_const.h": "c",
+        "stdatomic.h": "c",
+        "cmsis_os.h": "c",
+        "feb_uart_transmit.h": "c",
+        "sstream": "c"
     }
 }

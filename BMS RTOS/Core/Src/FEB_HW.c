@@ -8,15 +8,6 @@ extern SPI_HandleTypeDef hspi1;
 
 // ******************************** SPI ********************************
 
-void FEB_delay_u(uint16_t micro) {
-	int a=0;
-	while(micro--)a=micro;
-	a++;
-}
-
-void FEB_delay_m(uint16_t milli) {
-	HAL_Delay(milli);
-}
 void FEB_Siren_Activate(){
 	int period = 900;
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);

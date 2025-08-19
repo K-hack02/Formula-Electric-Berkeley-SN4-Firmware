@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "cmsis_os.h"
 
 // ********************************** Macros *************************************
 
@@ -14,6 +15,8 @@
 #define CELL 2
 #define AUX 3
 #define STAT 4
+
+#define RTOS_DELAY_MS(ms)  vTaskDelay( pdMS_TO_TICKS(ms) ? pdMS_TO_TICKS(ms) : 1 )
 
 // ********************************** Structs ************************************
 

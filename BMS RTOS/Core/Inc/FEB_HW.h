@@ -54,8 +54,6 @@ typedef struct {
 
 // ******************************** SPI ****************************************
 
-void FEB_delay_u(uint16_t micro);
-void FEB_delay_m(uint16_t milli);
 void FEB_cs_low(void);
 void FEB_cs_high(void);
 void FEB_spi_write_read(uint8_t tx_Data[], uint8_t tx_len, uint8_t *rx_data, size_t rx_len);

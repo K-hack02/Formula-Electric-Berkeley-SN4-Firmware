@@ -3,6 +3,10 @@
 #include "FEB_ADBMS6830B_Driver.h"
 #include "FEB_HW.h"
 #include "FEB_CMDCODES.h"
+#include "FEB_AD68xx_Interface.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 // ********************************** Functions **********************************
 
@@ -564,11 +568,11 @@ uint8_t ADBMS6830B_rdaux(uint8_t total_ic, // The number of ICs in the system
                      	   cell_asic *ic // Array of the parsed cell codes
                     	  )
 {
-	const uint8_t REG_LEN = 8; //Number of bytes in each ICs register + 2 bytes for the PEC
+	// const uint8_t REG_LEN = 8; //Number of bytes in each ICs register + 2 bytes for the PEC
 
 	int8_t pec_error = 0;
 	uint8_t *cell_data;
-	uint8_t c_ic = 0;
+	// uint8_t c_ic = 0;
 	cell_data = (uint8_t *) malloc((NUM_RX_BYT * total_ic) * sizeof(uint8_t));
 	transmitCMDR(RDAUXA,cell_data,NUM_RX_BYT * total_ic);
 	for(int i=0;i<total_ic;i++)
@@ -595,9 +599,9 @@ void wakeup_sleep(uint8_t total_ic) //Number of ICs in the system
 {
 	for(int i=0;i<1;i++){
 		FEB_cs_low();
-		HAL_Delay(1);
+		RTOS_DELAY_MS(1);
 		FEB_cs_high();
-		HAL_Delay(1);
+		RTOS_DELAY_MS(1);
 	}
 
 }
